@@ -25,6 +25,10 @@ func (jp *JankenBoardProfile) Player(p player.Player) *resource.Point {
 	return jp.points[p]
 }
 
+func (jp *JankenBoardProfile) PlayerNum() int {
+	return len(jp.points)
+}
+
 // Show print all resources
 func (jp *JankenBoardProfile) Show() string {
 	s := ""

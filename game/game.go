@@ -5,6 +5,7 @@ import (
 
 	"github.com/fuuki/board/action"
 	"github.com/fuuki/board/board"
+	"github.com/fuuki/board/result"
 )
 
 type CurrentPhase struct {
@@ -13,21 +14,27 @@ type CurrentPhase struct {
 }
 
 type Game[BP board.BoardProfile] struct {
+	// definition of games.
 	initialPhase PhaseName
 	phaseMap     []*Phase[BP]
 	boardProfile BP
-	current      *CurrentPhase
+	resultFn     func(*Game[BP]) *result.Result
+
+	// dynamic information of games.
+	current *CurrentPhase
 }
 
 func NewGame[BP board.BoardProfile](
 	initialPhase PhaseName,
 	phases []*Phase[BP],
 	boardProfile BP,
+	resultFn func(*Game[BP]) *result.Result,
 ) *Game[BP] {
 	return &Game[BP]{
 		initialPhase: initialPhase,
 		phaseMap:     phases,
 		boardProfile: boardProfile,
+		resultFn:     resultFn,
 	}
 }
 
@@ -40,6 +47,8 @@ func (g *Game[BP]) Play(inputer action.ActionInputer) {
 		}
 		ap = inputer.Input(apd)
 	}
+	result := g.resultFn(g)
+	fmt.Printf("%+v", result)
 }
 
 // Start returns the initial action profile definition.
@@ -59,6 +68,7 @@ func (g *Game[BP]) Next(ap *action.ActionProfile) (bool, *action.ActionProfileDe
 	}
 
 	fmt.Printf("== BoardProfile ==\n%s\n", g.BoardProfile().Show())
+
 	if next == "" {
 		return false, nil
 	}

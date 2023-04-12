@@ -3,6 +3,8 @@ package rock_paper_scissors
 import (
 	"github.com/fuuki/board/action"
 	"github.com/fuuki/board/game"
+	"github.com/fuuki/board/player"
+	"github.com/fuuki/board/result"
 )
 
 //go:generate stringer -type=Hand
@@ -28,7 +30,7 @@ func rockPaperScissorsGame() *game.Game[*JankenBoardProfile] {
 	rp := resourceProfile()
 
 	p1 := playPhase()
-	g := game.NewGame(PLAY_PHASE, []*game.Phase[*JankenBoardProfile]{p1}, rp)
+	g := game.NewGame(PLAY_PHASE, []*game.Phase[*JankenBoardProfile]{p1}, rp, resultFn)
 	return g
 }
 
@@ -88,6 +90,31 @@ func getReward(ap *action.ActionProfile, rp *JankenBoardProfile) {
 	}
 }
 
-func isFinished(rp *JankenBoardProfile) bool {
-	return rp.Player(0).Point() >= 3 || rp.Player(1).Point() >= 3
+func isFinished(jp *JankenBoardProfile) bool {
+	for i := 0; i < jp.PlayerNum(); i++ {
+		if jp.Player(player.Player(i)).Point() >= 3 {
+			return true
+		}
+	}
+	return false
+}
+
+func resultFn(g *game.Game[*JankenBoardProfile]) *result.Result {
+	r := result.NewResult()
+	rank := func(point int) uint {
+		if point == 3 {
+			return 1
+		}
+		return 2
+	}
+	for i := 0; i < g.BoardProfile().PlayerNum(); i++ {
+		score := g.BoardProfile().Player(player.Player(i)).Point()
+		r.AddPlayerResult(
+			result.PlayerResult{
+				Player: player.Player(i),
+				Score:  score,
+				Rank:   rank(score),
+			})
+	}
+	return r
 }
