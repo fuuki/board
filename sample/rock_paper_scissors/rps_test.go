@@ -1,4 +1,4 @@
-package rock_paper_scissors_test
+package rock_paper_scissors
 
 import (
 	"testing"
@@ -6,7 +6,6 @@ import (
 	"github.com/fuuki/board/action"
 	"github.com/fuuki/board/game"
 	"github.com/fuuki/board/resource"
-	"github.com/fuuki/board/sample/rock_paper_scissors"
 )
 
 func TestRockPaperScissorsGame(t *testing.T) {
@@ -18,7 +17,7 @@ func TestRockPaperScissorsGame(t *testing.T) {
 		{
 			name: "",
 			aps: func(g *game.Game) []*action.ActionProfile {
-				ap := g.ActionProfileDefinition().NewActionProfile()
+				ap := profileDef().NewActionProfile()
 				ap.Select(0, 0)
 				ap.Select(1, 1)
 				return []*action.ActionProfile{ap}
@@ -36,7 +35,7 @@ func TestRockPaperScissorsGame(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			g := rock_paper_scissors.RockPaperScissorsGame()
+			g := rockPaperScissorsGame()
 			aps := tt.aps(g)
 			g.Play(action.NewAutoActionInputer(aps))
 

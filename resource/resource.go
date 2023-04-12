@@ -18,6 +18,10 @@ func (r *Resource) AddPoint(point int) {
 	r.point += point
 }
 
+func (r *Resource) Point() int {
+	return r.point
+}
+
 type ResourceProfile struct {
 	resources map[player.Player]*Resource
 }

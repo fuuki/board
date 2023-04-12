@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	rock_paper_scissors.Game()
+	rock_paper_scissors.Play()
 }
