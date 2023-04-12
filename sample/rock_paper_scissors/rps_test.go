@@ -11,22 +11,23 @@ import (
 func TestRockPaperScissorsGame(t *testing.T) {
 	tests := []struct {
 		name string
-		aps  func(g *game.Game) []*action.ActionProfile
-		want func(g *game.Game) *resource.ResourceProfile
+		aps  func(g *game.Game[*resource.ResourceProfile]) []*action.ActionProfile
+		want func(g *game.Game[*resource.ResourceProfile]) *resource.ResourceProfile
 	}{
 		{
 			name: "",
-			aps: func(g *game.Game) []*action.ActionProfile {
+			aps: func(g *game.Game[*resource.ResourceProfile]) []*action.ActionProfile {
 				ap := profileDef().NewActionProfile()
 				ap.Select(0, 0)
 				ap.Select(1, 1)
-				return []*action.ActionProfile{ap}
+				return []*action.ActionProfile{ap, ap, ap}
 			},
-			want: func(g *game.Game) *resource.ResourceProfile {
+
+			want: func(g *game.Game[*resource.ResourceProfile]) *resource.ResourceProfile {
 				rp := resource.NewResourceProfile()
 				rp.AddResource(0, resource.NewResource())
 				rp.AddResource(1, resource.NewResource())
-				rp.Player(1).AddPoint(1)
+				rp.Player(1).AddPoint(3)
 				return rp
 			},
 		},
@@ -39,8 +40,8 @@ func TestRockPaperScissorsGame(t *testing.T) {
 			aps := tt.aps(g)
 			g.Play(action.NewAutoActionInputer(aps))
 
-			if !g.ResourceProfile().Equal(tt.want(g)) {
-				t.Errorf("RockPaperScissorsGame() = %v, want %v", g.ResourceProfile(), tt.want(g))
+			if !g.BoardProfile().Equal(tt.want(g)) {
+				t.Errorf("RockPaperScissorsGame() = %v, want %v", g.BoardProfile(), tt.want(g))
 			}
 		})
 	}

@@ -1,8 +1,10 @@
 package game
 
 import (
+	"fmt"
+
 	"github.com/fuuki/board/action"
-	"github.com/fuuki/board/resource"
+	"github.com/fuuki/board/board"
 )
 
 type CurrentPhase struct {
@@ -10,26 +12,26 @@ type CurrentPhase struct {
 	apd       *action.ActionProfileDefinition
 }
 
-type Game struct {
+type Game[BP board.BoardProfile] struct {
 	initialPhase PhaseName
-	phaseMap     []*Phase
-	rp           *resource.ResourceProfile
+	phaseMap     []*Phase[BP]
+	boardProfile BP
 	current      *CurrentPhase
 }
 
-func NewGame(
+func NewGame[BP board.BoardProfile](
 	initialPhase PhaseName,
-	phases []*Phase,
-	rp *resource.ResourceProfile,
-) *Game {
-	return &Game{
+	phases []*Phase[BP],
+	boardProfile BP,
+) *Game[BP] {
+	return &Game[BP]{
 		initialPhase: initialPhase,
 		phaseMap:     phases,
-		rp:           rp,
+		boardProfile: boardProfile,
 	}
 }
 
-func (g *Game) Play(inputer action.ActionInputer) {
+func (g *Game[BP]) Play(inputer action.ActionInputer) {
 	var ap *action.ActionProfile
 	for {
 		cnt, apd := g.Next(ap)
@@ -41,13 +43,13 @@ func (g *Game) Play(inputer action.ActionInputer) {
 }
 
 // Start returns the initial action profile definition.
-func (g *Game) Start() (bool, *action.ActionProfileDefinition) {
+func (g *Game[BP]) Start() (bool, *action.ActionProfileDefinition) {
 	return g.Next(nil)
 }
 
 // Next returns the next action profile definition.
 // bool is true if the game continues.
-func (g *Game) Next(ap *action.ActionProfile) (bool, *action.ActionProfileDefinition) {
+func (g *Game[BP]) Next(ap *action.ActionProfile) (bool, *action.ActionProfileDefinition) {
 	var next PhaseName
 	if g.current == nil {
 		next = g.initialPhase
@@ -56,7 +58,7 @@ func (g *Game) Next(ap *action.ActionProfile) (bool, *action.ActionProfileDefini
 		next = phase.execute(g, ap)
 	}
 
-	g.rp.Show()
+	fmt.Printf("== BoardProfile ==\n%s\n", g.BoardProfile().Show())
 	if next == "" {
 		return false, nil
 	}
@@ -70,7 +72,7 @@ func (g *Game) Next(ap *action.ActionProfile) (bool, *action.ActionProfileDefini
 	return true, apd
 }
 
-func (g *Game) getPhase(phaseName PhaseName) *Phase {
+func (g *Game[BP]) getPhase(phaseName PhaseName) *Phase[BP] {
 	for _, p := range g.phaseMap {
 		if p.name == phaseName {
 			return p
@@ -79,6 +81,6 @@ func (g *Game) getPhase(phaseName PhaseName) *Phase {
 	return nil
 }
 
-func (g *Game) ResourceProfile() *resource.ResourceProfile {
-	return g.rp
+func (g *Game[BP]) BoardProfile() BP {
+	return g.boardProfile
 }

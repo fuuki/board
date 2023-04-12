@@ -70,10 +70,7 @@ func iterator[T any](arr []T) func() T {
 	return func() T {
 		item := arr[index]
 		index++
-		// If index is out of range, reset it to 0.
-		if index >= len(arr) {
-			index = 0
-		}
+		// If index is out of range, panic occurs.
 		return item
 	}
 }

@@ -41,10 +41,12 @@ func (rp *ResourceProfile) Player(player player.Player) *Resource {
 }
 
 // Show print all resources
-func (rp *ResourceProfile) Show() {
+func (rp *ResourceProfile) Show() string {
+	s := ""
 	for p, r := range rp.resources {
-		fmt.Printf("Player %d: %d\n", p, r.point)
+		s += fmt.Sprintf("Player %d: %d pt(s)\n", p, r.point)
 	}
+	return s
 }
 
 func (rp *ResourceProfile) Equal(rp2 *ResourceProfile) bool {

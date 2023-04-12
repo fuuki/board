@@ -25,11 +25,11 @@ func Play() {
 }
 
 // rockPaperScissorsGame returns a game of rock-paper-scissors.
-func rockPaperScissorsGame() *game.Game {
+func rockPaperScissorsGame() *game.Game[*resource.ResourceProfile] {
 	rp := resourceProfile()
 
 	p1 := playPhase()
-	g := game.NewGame(PLAY_PHASE, []*game.Phase{p1}, rp)
+	g := game.NewGame(PLAY_PHASE, []*game.Phase[*resource.ResourceProfile]{p1}, rp)
 	return g
 }
 
@@ -42,16 +42,16 @@ func resourceProfile() *resource.ResourceProfile {
 }
 
 // playPhase returns a phase of rock-paper-scissors.
-func playPhase() *game.Phase {
-	prepare := func(_ *game.Game) *action.ActionProfileDefinition {
+func playPhase() *game.Phase[*resource.ResourceProfile] {
+	prepare := func(_ *game.Game[*resource.ResourceProfile]) *action.ActionProfileDefinition {
 		// Define action profile
 		apd := profileDef()
 		return apd
 	}
 
-	execute := func(g *game.Game, ap *action.ActionProfile) game.PhaseName {
-		getReward(ap, g.ResourceProfile())
-		if isFinished(g.ResourceProfile()) {
+	execute := func(g *game.Game[*resource.ResourceProfile], ap *action.ActionProfile) game.PhaseName {
+		getReward(ap, g.BoardProfile())
+		if isFinished(g.BoardProfile()) {
 			return ""
 		}
 		return PLAY_PHASE
