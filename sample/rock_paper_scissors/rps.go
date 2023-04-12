@@ -3,7 +3,6 @@ package rock_paper_scissors
 import (
 	"github.com/fuuki/board/action"
 	"github.com/fuuki/board/game"
-	"github.com/fuuki/board/resource"
 )
 
 //go:generate stringer -type=Hand
@@ -25,31 +24,29 @@ func Play() {
 }
 
 // rockPaperScissorsGame returns a game of rock-paper-scissors.
-func rockPaperScissorsGame() *game.Game[*resource.ResourceProfile] {
+func rockPaperScissorsGame() *game.Game[*JankenBoardProfile] {
 	rp := resourceProfile()
 
 	p1 := playPhase()
-	g := game.NewGame(PLAY_PHASE, []*game.Phase[*resource.ResourceProfile]{p1}, rp)
+	g := game.NewGame(PLAY_PHASE, []*game.Phase[*JankenBoardProfile]{p1}, rp)
 	return g
 }
 
 // resourceProfile returns a resource profile of rock-paper-scissors.
-func resourceProfile() *resource.ResourceProfile {
-	rp := resource.NewResourceProfile()
-	rp.AddResource(0, resource.NewResource())
-	rp.AddResource(1, resource.NewResource())
+func resourceProfile() *JankenBoardProfile {
+	rp := NewJankenBoardProfile(2)
 	return rp
 }
 
 // playPhase returns a phase of rock-paper-scissors.
-func playPhase() *game.Phase[*resource.ResourceProfile] {
-	prepare := func(_ *game.Game[*resource.ResourceProfile]) *action.ActionProfileDefinition {
+func playPhase() *game.Phase[*JankenBoardProfile] {
+	prepare := func(_ *game.Game[*JankenBoardProfile]) *action.ActionProfileDefinition {
 		// Define action profile
 		apd := profileDef()
 		return apd
 	}
 
-	execute := func(g *game.Game[*resource.ResourceProfile], ap *action.ActionProfile) game.PhaseName {
+	execute := func(g *game.Game[*JankenBoardProfile], ap *action.ActionProfile) game.PhaseName {
 		getReward(ap, g.BoardProfile())
 		if isFinished(g.BoardProfile()) {
 			return ""
@@ -71,7 +68,7 @@ func profileDef() *action.ActionProfileDefinition {
 }
 
 // getReward returns the result of the game.
-func getReward(ap *action.ActionProfile, rp *resource.ResourceProfile) {
+func getReward(ap *action.ActionProfile, rp *JankenBoardProfile) {
 	aa1, _ := ap.GetAction(0)
 	aa2, _ := ap.GetAction(1)
 	a1 := aa1.(Hand)
@@ -91,6 +88,6 @@ func getReward(ap *action.ActionProfile, rp *resource.ResourceProfile) {
 	}
 }
 
-func isFinished(rp *resource.ResourceProfile) bool {
+func isFinished(rp *JankenBoardProfile) bool {
 	return rp.Player(0).Point() >= 3 || rp.Player(1).Point() >= 3
 }

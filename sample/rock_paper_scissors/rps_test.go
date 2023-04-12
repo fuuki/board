@@ -5,28 +5,25 @@ import (
 
 	"github.com/fuuki/board/action"
 	"github.com/fuuki/board/game"
-	"github.com/fuuki/board/resource"
 )
 
 func TestRockPaperScissorsGame(t *testing.T) {
 	tests := []struct {
 		name string
-		aps  func(g *game.Game[*resource.ResourceProfile]) []*action.ActionProfile
-		want func(g *game.Game[*resource.ResourceProfile]) *resource.ResourceProfile
+		aps  func(g *game.Game[*JankenBoardProfile]) []*action.ActionProfile
+		want func(g *game.Game[*JankenBoardProfile]) *JankenBoardProfile
 	}{
 		{
 			name: "",
-			aps: func(g *game.Game[*resource.ResourceProfile]) []*action.ActionProfile {
+			aps: func(g *game.Game[*JankenBoardProfile]) []*action.ActionProfile {
 				ap := profileDef().NewActionProfile()
 				ap.Select(0, 0)
 				ap.Select(1, 1)
 				return []*action.ActionProfile{ap, ap, ap}
 			},
 
-			want: func(g *game.Game[*resource.ResourceProfile]) *resource.ResourceProfile {
-				rp := resource.NewResourceProfile()
-				rp.AddResource(0, resource.NewResource())
-				rp.AddResource(1, resource.NewResource())
+			want: func(g *game.Game[*JankenBoardProfile]) *JankenBoardProfile {
+				rp := NewJankenBoardProfile(2)
 				rp.Player(1).AddPoint(3)
 				return rp
 			},
