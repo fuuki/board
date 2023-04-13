@@ -1,25 +1,22 @@
-package action
+package board
 
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/fuuki/board/board"
-	"github.com/fuuki/board/player"
 )
 
-type ActionInputer[AP board.PlayerActionDefinition] interface {
-	Input(*board.ActionRequest[AP]) *board.ActionProfile[AP]
+type ActionInputer[AP PlayerActionDefinition] interface {
+	Input(*ActionRequest[AP]) *ActionProfile[AP]
 }
 
-type InteractiveActionInputer[AP board.PlayerActionDefinition] struct {
+type InteractiveActionInputer[AP PlayerActionDefinition] struct {
 }
 
 // var _ ActionInputer = (*InteractiveActionInputer)(nil)
 
-func (a *InteractiveActionInputer[AP]) Input(req *board.ActionRequest[AP]) *board.ActionProfile[AP] {
+func (a *InteractiveActionInputer[AP]) Input(req *ActionRequest[AP]) *ActionProfile[AP] {
 
-	ap := board.NewActionProfile[AP](2)
+	ap := NewActionProfile[AP](2)
 	for {
 		fmt.Println("プレイヤー番号とアクションを入力してください。 ex: 0 {\"Hand\":1}")
 		if err := a.entryInput(ap); err != nil {
@@ -32,7 +29,7 @@ func (a *InteractiveActionInputer[AP]) Input(req *board.ActionRequest[AP]) *boar
 	return ap
 }
 
-func (a *InteractiveActionInputer[AP]) entryInput(ap *board.ActionProfile[AP]) error {
+func (a *InteractiveActionInputer[AP]) entryInput(ap *ActionProfile[AP]) error {
 	p, str := getInput()
 	if err := a.registerAction(ap, p, str); err != nil {
 		return err
@@ -40,7 +37,7 @@ func (a *InteractiveActionInputer[AP]) entryInput(ap *board.ActionProfile[AP]) e
 	return nil
 }
 
-func (a *InteractiveActionInputer[AP]) registerAction(ap *board.ActionProfile[AP], p int, str string) error {
+func (a *InteractiveActionInputer[AP]) registerAction(ap *ActionProfile[AP], p int, str string) error {
 	if p < 0 || 1 < p {
 		return fmt.Errorf("プレイヤー番号は0か1を入力してください。")
 	}
@@ -49,7 +46,7 @@ func (a *InteractiveActionInputer[AP]) registerAction(ap *board.ActionProfile[AP
 	if err := json.Unmarshal([]byte(str), act); err != nil {
 		return err
 	}
-	ap.SetPlayerAction(player.Player(p), act)
+	ap.SetPlayerAction(Player(p), act)
 	return nil
 }
 
@@ -66,20 +63,20 @@ func getInput() (int, string) {
 	return p, str
 }
 
-type AutoActionInputer[AP board.PlayerActionDefinition] struct {
-	next func() *board.ActionProfile[AP]
+type AutoActionInputer[AP PlayerActionDefinition] struct {
+	next func() *ActionProfile[AP]
 }
 
 // var _ ActionInputer = (*AutoActionInputer)(nil)
 
-func NewAutoActionInputer[AP board.PlayerActionDefinition](apr []*board.ActionProfile[AP]) *AutoActionInputer[AP] {
+func NewAutoActionInputer[AP PlayerActionDefinition](apr []*ActionProfile[AP]) *AutoActionInputer[AP] {
 	iterator := iterator(apr)
 	return &AutoActionInputer[AP]{
 		next: iterator,
 	}
 }
 
-func (a *AutoActionInputer[AP]) Input(_ *board.ActionRequest[AP]) *board.ActionProfile[AP] {
+func (a *AutoActionInputer[AP]) Input(_ *ActionRequest[AP]) *ActionProfile[AP] {
 	return a.next()
 }
 

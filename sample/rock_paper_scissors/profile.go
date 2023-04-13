@@ -3,25 +3,25 @@ package rock_paper_scissors
 import (
 	"fmt"
 
-	"github.com/fuuki/board/player"
+	"github.com/fuuki/board/board"
 	"github.com/fuuki/board/resource"
 )
 
 type JankenBoardProfile struct {
-	points map[player.Player]*resource.Point
+	points map[board.Player]*resource.Point
 }
 
 func NewJankenBoardProfile(playerNum int) *JankenBoardProfile {
 	p := &JankenBoardProfile{
-		points: make(map[player.Player]*resource.Point),
+		points: make(map[board.Player]*resource.Point),
 	}
 	for i := 0; i < playerNum; i++ {
-		p.points[player.Player(i)] = resource.NewPoint()
+		p.points[board.Player(i)] = resource.NewPoint()
 	}
 	return p
 }
 
-func (jp *JankenBoardProfile) Player(p player.Player) *resource.Point {
+func (jp *JankenBoardProfile) Player(p board.Player) *resource.Point {
 	return jp.points[p]
 }
 

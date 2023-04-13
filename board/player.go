@@ -1,3 +1,3 @@
-package player
+package board
 
 type Player int

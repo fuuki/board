@@ -3,9 +3,7 @@ package rock_paper_scissors
 import (
 	"testing"
 
-	"github.com/fuuki/board/action"
 	"github.com/fuuki/board/board"
-	"github.com/fuuki/board/player"
 )
 
 func TestRockPaperScissorsGame(t *testing.T) {
@@ -24,8 +22,8 @@ func TestRockPaperScissorsGame(t *testing.T) {
 					Hand: PAPER,
 				}
 				ap := board.NewActionProfile[*JankenActionProfile](2)
-				ap.SetPlayerAction(player.Player(0), &a0)
-				ap.SetPlayerAction(player.Player(1), &a1)
+				ap.SetPlayerAction(board.Player(0), &a0)
+				ap.SetPlayerAction(board.Player(1), &a1)
 				return []*jAction{ap, ap, ap}
 			},
 
@@ -42,7 +40,7 @@ func TestRockPaperScissorsGame(t *testing.T) {
 			t.Parallel()
 			g := rockPaperScissorsGame()
 			aps := tt.aps(g)
-			g.Play(action.NewAutoActionInputer(aps))
+			g.Play(board.NewAutoActionInputer(aps))
 
 			if !g.BoardProfile().Equal(tt.want(g)) {
 				t.Errorf("RockPaperScissorsGame() = %v, want %v", g.BoardProfile(), tt.want(g))

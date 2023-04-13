@@ -1,33 +1,29 @@
-package game
+package board
 
 import (
 	"fmt"
-
-	"github.com/fuuki/board/action"
-	"github.com/fuuki/board/board"
-	"github.com/fuuki/board/result"
 )
 
 type CurrentPhase struct {
 	phaseName PhaseName
 }
 
-type Game[BP board.BoardProfile, AP board.PlayerActionDefinition] struct {
+type Game[BP BoardProfile, AP PlayerActionDefinition] struct {
 	// definition of games.
 	initialPhase PhaseName
 	phaseMap     []*Phase[BP, AP]
 	boardProfile BP
-	resultFn     func(*Game[BP, AP]) *result.Result
+	resultFn     func(*Game[BP, AP]) *Result
 
 	// dynamic information of games.
 	current *CurrentPhase
 }
 
-func NewGame[BP board.BoardProfile, AP board.PlayerActionDefinition](
+func NewGame[BP BoardProfile, AP PlayerActionDefinition](
 	initialPhase PhaseName,
 	phases []*Phase[BP, AP],
 	boardProfile BP,
-	resultFn func(*Game[BP, AP]) *result.Result,
+	resultFn func(*Game[BP, AP]) *Result,
 ) *Game[BP, AP] {
 	return &Game[BP, AP]{
 		initialPhase: initialPhase,
@@ -37,8 +33,8 @@ func NewGame[BP board.BoardProfile, AP board.PlayerActionDefinition](
 	}
 }
 
-func (g *Game[BP, AP]) Play(inputer action.ActionInputer[AP]) {
-	var ap *board.ActionProfile[AP]
+func (g *Game[BP, AP]) Play(inputer ActionInputer[AP]) {
+	var ap *ActionProfile[AP]
 	for {
 		cnt, apr := g.Next(ap)
 		if !cnt {
@@ -52,13 +48,13 @@ func (g *Game[BP, AP]) Play(inputer action.ActionInputer[AP]) {
 
 // Start returns the initial action profile definition.
 // bool is true if the game continues.
-func (g *Game[BP, AP]) Start() (bool, *board.ActionRequest[AP]) {
+func (g *Game[BP, AP]) Start() (bool, *ActionRequest[AP]) {
 	return g.Next(nil)
 }
 
 // Next returns the next action profile definition.
 // bool is true if the game continues.
-func (g *Game[BP, AP]) Next(ap *board.ActionProfile[AP]) (bool, *board.ActionRequest[AP]) {
+func (g *Game[BP, AP]) Next(ap *ActionProfile[AP]) (bool, *ActionRequest[AP]) {
 	var next PhaseName
 	if g.current == nil {
 		next = g.initialPhase

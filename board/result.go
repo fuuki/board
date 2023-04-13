@@ -1,6 +1,4 @@
-package result
-
-import "github.com/fuuki/board/player"
+package board
 
 type Result struct {
 	Players []PlayerResult
@@ -11,7 +9,7 @@ func NewResult() *Result {
 }
 
 type PlayerResult struct {
-	Player player.Player
+	Player Player
 	Score  int
 	Rank   uint
 }

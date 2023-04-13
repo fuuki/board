@@ -1,25 +1,21 @@
 package rock_paper_scissors
 
 import (
-	"github.com/fuuki/board/action"
 	"github.com/fuuki/board/board"
-	"github.com/fuuki/board/game"
-	"github.com/fuuki/board/player"
-	"github.com/fuuki/board/result"
 )
 
 const (
-	PLAY_PHASE game.PhaseName = "play"
+	PLAY_PHASE board.PhaseName = "play"
 )
 
-type jGame = game.Game[*JankenBoardProfile, *JankenActionProfile]
-type jPhase = game.Phase[*JankenBoardProfile, *JankenActionProfile]
+type jGame = board.Game[*JankenBoardProfile, *JankenActionProfile]
+type jPhase = board.Phase[*JankenBoardProfile, *JankenActionProfile]
 type jAction = board.ActionProfile[*JankenActionProfile]
 type jActionReq = board.ActionRequest[*JankenActionProfile]
 
 func Play() {
 	g := rockPaperScissorsGame()
-	inputer := &action.InteractiveActionInputer[*JankenActionProfile]{}
+	inputer := &board.InteractiveActionInputer[*JankenActionProfile]{}
 	g.Play(inputer)
 }
 
@@ -28,7 +24,7 @@ func rockPaperScissorsGame() *jGame {
 	rp := resourceProfile()
 
 	p1 := playPhase()
-	g := game.NewGame(PLAY_PHASE, []*jPhase{p1}, rp, resultFn)
+	g := board.NewGame(PLAY_PHASE, []*jPhase{p1}, rp, resultFn)
 	return g
 }
 
@@ -46,7 +42,7 @@ func playPhase() *jPhase {
 		return apr
 	}
 
-	execute := func(g *jGame, ap *jAction) game.PhaseName {
+	execute := func(g *jGame, ap *jAction) board.PhaseName {
 		getReward(ap, g.BoardProfile())
 		if isFinished(g.BoardProfile()) {
 			return ""
@@ -54,7 +50,7 @@ func playPhase() *jPhase {
 		return PLAY_PHASE
 	}
 
-	p := game.NewPhase(PLAY_PHASE, prepare, execute)
+	p := board.NewPhase(PLAY_PHASE, prepare, execute)
 	return p
 }
 
@@ -64,10 +60,10 @@ func profileDef() *jActionReq {
 	return r
 }
 
-// getReward returns the result of the game.
+// getReward returns the result of the board.
 func getReward(ap *jAction, rp *JankenBoardProfile) {
-	a0 := (*ap.Player(player.Player(0))).Hand
-	a1 := (*ap.Player(player.Player(1))).Hand
+	a0 := (*ap.Player(board.Player(0))).Hand
+	a1 := (*ap.Player(board.Player(1))).Hand
 
 	switch (a0 - a1 + 3) % 3 {
 	case 0:
@@ -85,15 +81,15 @@ func getReward(ap *jAction, rp *JankenBoardProfile) {
 
 func isFinished(jp *JankenBoardProfile) bool {
 	for i := 0; i < jp.PlayerNum(); i++ {
-		if jp.Player(player.Player(i)).Point() >= 3 {
+		if jp.Player(board.Player(i)).Point() >= 3 {
 			return true
 		}
 	}
 	return false
 }
 
-func resultFn(g *jGame) *result.Result {
-	r := result.NewResult()
+func resultFn(g *jGame) *board.Result {
+	r := board.NewResult()
 	rank := func(point int) uint {
 		if point == 3 {
 			return 1
@@ -101,10 +97,10 @@ func resultFn(g *jGame) *result.Result {
 		return 2
 	}
 	for i := 0; i < g.BoardProfile().PlayerNum(); i++ {
-		score := g.BoardProfile().Player(player.Player(i)).Point()
+		score := g.BoardProfile().Player(board.Player(i)).Point()
 		r.AddPlayerResult(
-			result.PlayerResult{
-				Player: player.Player(i),
+			board.PlayerResult{
+				Player: board.Player(i),
 				Score:  score,
 				Rank:   rank(score),
 			})
