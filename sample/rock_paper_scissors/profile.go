@@ -46,3 +46,17 @@ func (jp *JankenBoardProfile) Equal(jp2 *JankenBoardProfile) bool {
 	}
 	return true
 }
+
+//go:generate stringer -type=Hand
+type Hand int
+
+const (
+	ROCK Hand = iota
+	PAPER
+	SCISSORS
+)
+
+type JankenActionProfile struct {
+	// Action is an action of the player.
+	Hand Hand
+}

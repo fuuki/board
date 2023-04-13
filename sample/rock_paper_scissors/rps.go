@@ -2,35 +2,33 @@ package rock_paper_scissors
 
 import (
 	"github.com/fuuki/board/action"
+	"github.com/fuuki/board/board"
 	"github.com/fuuki/board/game"
 	"github.com/fuuki/board/player"
 	"github.com/fuuki/board/result"
-)
-
-//go:generate stringer -type=Hand
-type Hand int
-
-const (
-	ROCK Hand = iota
-	PAPER
-	SCISSORS
 )
 
 const (
 	PLAY_PHASE game.PhaseName = "play"
 )
 
+type jGame = game.Game[*JankenBoardProfile, *JankenActionProfile]
+type jPhase = game.Phase[*JankenBoardProfile, *JankenActionProfile]
+type jAction = board.ActionProfile[*JankenActionProfile]
+type jActionReq = board.ActionRequest[*JankenActionProfile]
+
 func Play() {
 	g := rockPaperScissorsGame()
-	g.Play(&action.InteractiveActionInputer{})
+	inputer := &action.InteractiveActionInputer[*JankenActionProfile]{}
+	g.Play(inputer)
 }
 
 // rockPaperScissorsGame returns a game of rock-paper-scissors.
-func rockPaperScissorsGame() *game.Game[*JankenBoardProfile] {
+func rockPaperScissorsGame() *jGame {
 	rp := resourceProfile()
 
 	p1 := playPhase()
-	g := game.NewGame(PLAY_PHASE, []*game.Phase[*JankenBoardProfile]{p1}, rp, resultFn)
+	g := game.NewGame(PLAY_PHASE, []*jPhase{p1}, rp, resultFn)
 	return g
 }
 
@@ -41,14 +39,14 @@ func resourceProfile() *JankenBoardProfile {
 }
 
 // playPhase returns a phase of rock-paper-scissors.
-func playPhase() *game.Phase[*JankenBoardProfile] {
-	prepare := func(_ *game.Game[*JankenBoardProfile]) *action.ActionProfileDefinition {
+func playPhase() *jPhase {
+	prepare := func(_ *jGame) *jActionReq {
 		// Define action profile
-		apd := profileDef()
-		return apd
+		apr := profileDef()
+		return apr
 	}
 
-	execute := func(g *game.Game[*JankenBoardProfile], ap *action.ActionProfile) game.PhaseName {
+	execute := func(g *jGame, ap *jAction) game.PhaseName {
 		getReward(ap, g.BoardProfile())
 		if isFinished(g.BoardProfile()) {
 			return ""
@@ -60,23 +58,18 @@ func playPhase() *game.Phase[*JankenBoardProfile] {
 	return p
 }
 
-func profileDef() *action.ActionProfileDefinition {
-	def := action.NewActionDefinition()
-	def.AddChoice([]action.ActionChoiceOption{ROCK, PAPER, SCISSORS})
-	apd := action.NewActionProfileDefinition()
-	apd.AddActionDefinition(0, def)
-	apd.AddActionDefinition(1, def)
-	return apd
+func profileDef() *jActionReq {
+	// TODO: implement
+	r := &jActionReq{}
+	return r
 }
 
 // getReward returns the result of the game.
-func getReward(ap *action.ActionProfile, rp *JankenBoardProfile) {
-	aa1, _ := ap.GetAction(0)
-	aa2, _ := ap.GetAction(1)
-	a1 := aa1.(Hand)
-	a2 := aa2.(Hand)
+func getReward(ap *jAction, rp *JankenBoardProfile) {
+	a0 := (*ap.Player(player.Player(0))).Hand
+	a1 := (*ap.Player(player.Player(1))).Hand
 
-	switch (a1 - a2 + 3) % 3 {
+	switch (a0 - a1 + 3) % 3 {
 	case 0:
 		return
 	case 1:
@@ -99,7 +92,7 @@ func isFinished(jp *JankenBoardProfile) bool {
 	return false
 }
 
-func resultFn(g *game.Game[*JankenBoardProfile]) *result.Result {
+func resultFn(g *jGame) *result.Result {
 	r := result.NewResult()
 	rank := func(point int) uint {
 		if point == 3 {

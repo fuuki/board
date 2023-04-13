@@ -10,27 +10,26 @@ import (
 
 type CurrentPhase struct {
 	phaseName PhaseName
-	apd       *action.ActionProfileDefinition
 }
 
-type Game[BP board.BoardProfile] struct {
+type Game[BP board.BoardProfile, AP board.PlayerActionDefinition] struct {
 	// definition of games.
 	initialPhase PhaseName
-	phaseMap     []*Phase[BP]
+	phaseMap     []*Phase[BP, AP]
 	boardProfile BP
-	resultFn     func(*Game[BP]) *result.Result
+	resultFn     func(*Game[BP, AP]) *result.Result
 
 	// dynamic information of games.
 	current *CurrentPhase
 }
 
-func NewGame[BP board.BoardProfile](
+func NewGame[BP board.BoardProfile, AP board.PlayerActionDefinition](
 	initialPhase PhaseName,
-	phases []*Phase[BP],
+	phases []*Phase[BP, AP],
 	boardProfile BP,
-	resultFn func(*Game[BP]) *result.Result,
-) *Game[BP] {
-	return &Game[BP]{
+	resultFn func(*Game[BP, AP]) *result.Result,
+) *Game[BP, AP] {
+	return &Game[BP, AP]{
 		initialPhase: initialPhase,
 		phaseMap:     phases,
 		boardProfile: boardProfile,
@@ -38,27 +37,28 @@ func NewGame[BP board.BoardProfile](
 	}
 }
 
-func (g *Game[BP]) Play(inputer action.ActionInputer) {
-	var ap *action.ActionProfile
+func (g *Game[BP, AP]) Play(inputer action.ActionInputer[AP]) {
+	var ap *board.ActionProfile[AP]
 	for {
-		cnt, apd := g.Next(ap)
+		cnt, apr := g.Next(ap)
 		if !cnt {
 			break
 		}
-		ap = inputer.Input(apd)
+		ap = inputer.Input(apr)
 	}
 	result := g.resultFn(g)
 	fmt.Printf("%+v", result)
 }
 
 // Start returns the initial action profile definition.
-func (g *Game[BP]) Start() (bool, *action.ActionProfileDefinition) {
+// bool is true if the game continues.
+func (g *Game[BP, AP]) Start() (bool, *board.ActionRequest[AP]) {
 	return g.Next(nil)
 }
 
 // Next returns the next action profile definition.
 // bool is true if the game continues.
-func (g *Game[BP]) Next(ap *action.ActionProfile) (bool, *action.ActionProfileDefinition) {
+func (g *Game[BP, AP]) Next(ap *board.ActionProfile[AP]) (bool, *board.ActionRequest[AP]) {
 	var next PhaseName
 	if g.current == nil {
 		next = g.initialPhase
@@ -74,15 +74,14 @@ func (g *Game[BP]) Next(ap *action.ActionProfile) (bool, *action.ActionProfileDe
 	}
 
 	nextPhase := g.getPhase(next)
-	apd := nextPhase.prepare(g)
+	apr := nextPhase.prepare(g)
 	g.current = &CurrentPhase{
 		phaseName: next,
-		apd:       apd,
 	}
-	return true, apd
+	return true, apr
 }
 
-func (g *Game[BP]) getPhase(phaseName PhaseName) *Phase[BP] {
+func (g *Game[BP, AP]) getPhase(phaseName PhaseName) *Phase[BP, AP] {
 	for _, p := range g.phaseMap {
 		if p.name == phaseName {
 			return p
@@ -91,6 +90,6 @@ func (g *Game[BP]) getPhase(phaseName PhaseName) *Phase[BP] {
 	return nil
 }
 
-func (g *Game[BP]) BoardProfile() BP {
+func (g *Game[BP, AP]) BoardProfile() BP {
 	return g.boardProfile
 }

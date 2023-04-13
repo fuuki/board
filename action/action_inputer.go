@@ -1,67 +1,85 @@
 package action
 
 import (
+	"encoding/json"
 	"fmt"
 
+	"github.com/fuuki/board/board"
 	"github.com/fuuki/board/player"
 )
 
-type ActionInputer interface {
-	Input(apd *ActionProfileDefinition) *ActionProfile
+type ActionInputer[AP board.PlayerActionDefinition] interface {
+	Input(*board.ActionRequest[AP]) *board.ActionProfile[AP]
 }
 
-type InteractiveActionInputer struct {
+type InteractiveActionInputer[AP board.PlayerActionDefinition] struct {
 }
 
-var _ ActionInputer = (*InteractiveActionInputer)(nil)
+// var _ ActionInputer = (*InteractiveActionInputer)(nil)
 
-func (i *InteractiveActionInputer) Input(apd *ActionProfileDefinition) *ActionProfile {
-	ap := apd.NewActionProfile()
+func (a *InteractiveActionInputer[AP]) Input(req *board.ActionRequest[AP]) *board.ActionProfile[AP] {
+
+	ap := board.NewActionProfile[AP](2)
 	for {
-		if err := registerAction(ap); err != nil {
+		fmt.Println("プレイヤー番号とアクションを入力してください。 ex: 0 {\"Hand\":1}")
+		if err := a.entryInput(ap); err != nil {
 			fmt.Println(err)
 		}
-		if ap.IsSelectCompleted() {
+		if req.IsValid(ap) {
 			break
 		}
 	}
 	return ap
 }
 
-func registerAction(ap *ActionProfile) error {
-	ap.ShowAllChoices()
-	p, a := getInput()
-	err := ap.Select(player.Player(p), Action(a))
-	return err
+func (a *InteractiveActionInputer[AP]) entryInput(ap *board.ActionProfile[AP]) error {
+	p, str := getInput()
+	if err := a.registerAction(ap, p, str); err != nil {
+		return err
+	}
+	return nil
 }
 
-func getInput() (int, int) {
+func (a *InteractiveActionInputer[AP]) registerAction(ap *board.ActionProfile[AP], p int, str string) error {
+	if p < 0 || 1 < p {
+		return fmt.Errorf("プレイヤー番号は0か1を入力してください。")
+	}
+
+	act := new(AP)
+	if err := json.Unmarshal([]byte(str), act); err != nil {
+		return err
+	}
+	ap.SetPlayerAction(player.Player(p), act)
+	return nil
+}
+
+func getInput() (int, string) {
 	var p int
-	var a int
+	var str string
 	for {
-		n, _ := fmt.Scanln(&p, &a)
+		n, _ := fmt.Scanln(&p, &str)
 		if n == 2 {
 			break
 		}
 		fmt.Println("無効な入力です。もう一度入力してください。")
 	}
-	return p, a
+	return p, str
 }
 
-type AutoActionInputer struct {
-	next func() *ActionProfile
+type AutoActionInputer[AP board.PlayerActionDefinition] struct {
+	next func() *board.ActionProfile[AP]
 }
 
-var _ ActionInputer = (*AutoActionInputer)(nil)
+// var _ ActionInputer = (*AutoActionInputer)(nil)
 
-func NewAutoActionInputer(aps []*ActionProfile) *AutoActionInputer {
-	iterator := iterator(aps)
-	return &AutoActionInputer{
+func NewAutoActionInputer[AP board.PlayerActionDefinition](apr []*board.ActionProfile[AP]) *AutoActionInputer[AP] {
+	iterator := iterator(apr)
+	return &AutoActionInputer[AP]{
 		next: iterator,
 	}
 }
 
-func (a *AutoActionInputer) Input(_ *ActionProfileDefinition) *ActionProfile {
+func (a *AutoActionInputer[AP]) Input(_ *board.ActionRequest[AP]) *board.ActionProfile[AP] {
 	return a.next()
 }
 
