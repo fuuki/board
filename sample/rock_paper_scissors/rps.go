@@ -42,12 +42,12 @@ func playPhase() *jPhase {
 		return apr
 	}
 
-	execute := func(g *jGame, ap *jAction) board.PhaseName {
+	execute := func(g *jGame, bp *JankenBoardProfile, ap *jAction) (board.PhaseName, *JankenBoardProfile) {
 		getReward(ap, g.BoardProfile())
 		if isFinished(g.BoardProfile()) {
-			return ""
+			return "", bp
 		}
-		return PLAY_PHASE
+		return PLAY_PHASE, bp
 	}
 
 	p := board.NewPhase(PLAY_PHASE, prepare, execute)
