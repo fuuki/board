@@ -4,7 +4,7 @@ type PlayerActionDefinition interface {
 }
 
 type ActionRequest[AP PlayerActionDefinition] interface {
-	IsValid(ActionProfile[AP]) bool
+	IsValid(ActionProfile[AP]) error
 }
 
 type ActionProfile[AP PlayerActionDefinition] struct {

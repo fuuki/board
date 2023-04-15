@@ -63,9 +63,9 @@ type JankenActionProfile struct {
 
 type JankenActionRequest struct{}
 
-func (ar *JankenActionRequest) IsValid(ap jAction) bool {
+func (ar *JankenActionRequest) IsValid(ap jAction) error {
 	// TODO: check if the action is valid
-	return true
+	return nil
 }
 
 var _ jActionReq = &JankenActionRequest{}

@@ -22,7 +22,7 @@ func (a *InteractiveActionInputer[AP]) Input(req ActionRequest[AP]) *ActionProfi
 		if err := a.entryInput(ap); err != nil {
 			fmt.Println(err)
 		}
-		if req.IsValid(*ap) {
+		if req.IsValid(*ap) == nil {
 			break
 		}
 	}
