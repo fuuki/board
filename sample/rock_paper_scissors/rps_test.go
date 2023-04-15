@@ -22,8 +22,8 @@ func TestRockPaperScissorsGame(t *testing.T) {
 					Hand: PAPER,
 				}
 				ap := board.NewActionProfile[*JankenActionProfile](2)
-				ap.SetPlayerAction(board.Player(0), &a0)
-				ap.SetPlayerAction(board.Player(1), &a1)
+				ap.SetPlayerAction(board.Player(0), a0)
+				ap.SetPlayerAction(board.Player(1), a1)
 				return []*jAction{ap, ap, ap}
 			}(),
 

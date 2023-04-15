@@ -17,7 +17,7 @@ func playPhasePrepare(g *jGame) *jActionReq {
 func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.PhaseName, *daifugoBoardProfile) {
 	p := bp.turn.Current()
 	a := ap.Player(p)
-	cards := bp.Player(p).PickMulti((**a).Select)
+	cards := bp.Player(p).PickMulti((*a).Select)
 	bp.PlayArea.AddMulti(cards)
 	if isFinished(g, bp) {
 		return "", bp

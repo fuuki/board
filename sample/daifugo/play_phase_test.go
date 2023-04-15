@@ -64,7 +64,7 @@ func Test_playPhaseExecute(t *testing.T) {
 						Select: []resource.CardID{"s2"},
 					}
 					ap := board.NewActionProfile[*daifugoActionProfile](2)
-					ap.SetPlayerAction(0, &p)
+					ap.SetPlayerAction(0, p)
 					return ap
 				}(),
 			},

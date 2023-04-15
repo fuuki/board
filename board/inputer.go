@@ -42,7 +42,7 @@ func (a *InteractiveActionInputer[AP]) registerAction(ap *ActionProfile[AP], p i
 		return fmt.Errorf("プレイヤー番号は0か1を入力してください。")
 	}
 
-	act := new(AP)
+	act := *new(AP)
 	if err := json.Unmarshal([]byte(str), act); err != nil {
 		return err
 	}
