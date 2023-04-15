@@ -13,6 +13,7 @@ type Game[BP BoardProfile, AP PlayerActionDefinition] struct {
 	initialPhase PhaseName
 	phaseMap     []*Phase[BP, AP]
 	resultFn     func(*Game[BP, AP]) *Result
+	totalPlayers uint
 
 	// dynamic information of games.
 	gameState GameState[BP, AP]
@@ -24,6 +25,7 @@ type GameState[BP BoardProfile, AP PlayerActionDefinition] struct {
 }
 
 func NewGame[BP BoardProfile, AP PlayerActionDefinition](
+	totalPlayers uint,
 	initialPhase PhaseName,
 	phases []*Phase[BP, AP],
 	boardProfile BP,
@@ -33,6 +35,7 @@ func NewGame[BP BoardProfile, AP PlayerActionDefinition](
 		BoardProfile: boardProfile,
 	}
 	return &Game[BP, AP]{
+		totalPlayers: totalPlayers,
 		initialPhase: initialPhase,
 		phaseMap:     phases,
 		resultFn:     resultFn,
@@ -97,4 +100,18 @@ func (g *Game[BP, AP]) getPhase(phaseName PhaseName) *Phase[BP, AP] {
 
 func (g *Game[BP, AP]) BoardProfile() BP {
 	return g.gameState.BoardProfile
+}
+
+// TotalPlayers returns the total number of players.
+func (g *Game[BP, AP]) TotalPlayers() uint {
+	return g.totalPlayers
+}
+
+// Players returns the players.
+func (g *Game[BP, AP]) Players() []Player {
+	players := make([]Player, g.totalPlayers)
+	for i := uint(0); i < g.totalPlayers; i++ {
+		players[i] = Player(i)
+	}
+	return players
 }

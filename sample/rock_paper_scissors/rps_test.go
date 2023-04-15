@@ -9,12 +9,12 @@ import (
 func TestRockPaperScissorsGame(t *testing.T) {
 	tests := []struct {
 		name string
-		aps  func(g *jGame) []*jAction
-		want func(g *jGame) *JankenBoardProfile
+		aps  []*jAction
+		want *JankenBoardProfile
 	}{
 		{
 			name: "",
-			aps: func(g *jGame) []*jAction {
+			aps: func() []*jAction {
 				a0 := &JankenActionProfile{
 					Hand: ROCK,
 				}
@@ -25,13 +25,13 @@ func TestRockPaperScissorsGame(t *testing.T) {
 				ap.SetPlayerAction(board.Player(0), &a0)
 				ap.SetPlayerAction(board.Player(1), &a1)
 				return []*jAction{ap, ap, ap}
-			},
+			}(),
 
-			want: func(g *jGame) *JankenBoardProfile {
+			want: func() *JankenBoardProfile {
 				rp := NewJankenBoardProfile(2)
 				rp.Player(1).AddPoint(3)
 				return rp
-			},
+			}(),
 		},
 	}
 	for _, tt := range tests {
@@ -39,11 +39,11 @@ func TestRockPaperScissorsGame(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			g := rockPaperScissorsGame()
-			aps := tt.aps(g)
+			aps := tt.aps
 			g.Play(board.NewAutoActionInputer(aps))
 
-			if !g.BoardProfile().Equal(tt.want(g)) {
-				t.Errorf("RockPaperScissorsGame() = %v, want %v", g.BoardProfile(), tt.want(g))
+			if !g.BoardProfile().Equal(tt.want) {
+				t.Errorf("RockPaperScissorsGame() = %v, want %v", g.BoardProfile(), tt.want)
 			}
 		})
 	}
