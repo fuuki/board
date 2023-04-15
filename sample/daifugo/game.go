@@ -38,8 +38,8 @@ func resourceProfile() *daifugoBoardProfile {
 
 // dealPhase returns a phase of deal cards.
 func dealPhase() *jPhase {
-	prepare := func(_ *jGame) *jActionReq {
-		apr := &jActionReq{}
+	prepare := func(_ *jGame) jActionReq {
+		apr := &daifugoActionRequest{}
 		return apr
 	}
 

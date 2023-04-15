@@ -6,7 +6,7 @@ import (
 )
 
 type ActionInputer[AP PlayerActionDefinition] interface {
-	Input(*ActionRequest[AP]) *ActionProfile[AP]
+	Input(ActionRequest[AP]) *ActionProfile[AP]
 }
 
 type InteractiveActionInputer[AP PlayerActionDefinition] struct {
@@ -14,7 +14,7 @@ type InteractiveActionInputer[AP PlayerActionDefinition] struct {
 
 // var _ ActionInputer = (*InteractiveActionInputer)(nil)
 
-func (a *InteractiveActionInputer[AP]) Input(req *ActionRequest[AP]) *ActionProfile[AP] {
+func (a *InteractiveActionInputer[AP]) Input(req ActionRequest[AP]) *ActionProfile[AP] {
 
 	ap := NewActionProfile[AP](2)
 	for {
@@ -22,7 +22,7 @@ func (a *InteractiveActionInputer[AP]) Input(req *ActionRequest[AP]) *ActionProf
 		if err := a.entryInput(ap); err != nil {
 			fmt.Println(err)
 		}
-		if req.IsValid(ap) {
+		if req.IsCompleted(*ap) {
 			break
 		}
 	}
@@ -76,7 +76,7 @@ func NewAutoActionInputer[AP PlayerActionDefinition](apr []*ActionProfile[AP]) *
 	}
 }
 
-func (a *AutoActionInputer[AP]) Input(_ *ActionRequest[AP]) *ActionProfile[AP] {
+func (a *AutoActionInputer[AP]) Input(_ ActionRequest[AP]) *ActionProfile[AP] {
 	return a.next()
 }
 

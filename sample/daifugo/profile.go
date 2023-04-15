@@ -41,3 +41,12 @@ type daifugoActionProfile struct {
 	// Action is an action of the player.
 	Select []resource.CardID
 }
+
+type daifugoActionRequest struct {
+}
+
+func (ar *daifugoActionRequest) IsCompleted(ap jAction) bool {
+	return true
+}
+
+var _ jActionReq = &daifugoActionRequest{}

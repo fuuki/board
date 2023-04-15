@@ -3,16 +3,8 @@ package board
 type PlayerActionDefinition interface {
 }
 
-type ActionRequest[AP PlayerActionDefinition] struct {
-}
-
-func (ar *ActionRequest[AP]) IsValid(ap *ActionProfile[AP]) bool {
-	for _, a := range ap.playerActions {
-		if &a == new(AP) {
-			return false
-		}
-	}
-	return true
+type ActionRequest[AP PlayerActionDefinition] interface {
+	IsCompleted(ActionProfile[AP]) bool
 }
 
 type ActionProfile[AP PlayerActionDefinition] struct {

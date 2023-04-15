@@ -36,7 +36,7 @@ func resourceProfile() *JankenBoardProfile {
 
 // playPhase returns a phase of rock-paper-scissors.
 func playPhase() *jPhase {
-	prepare := func(_ *jGame) *jActionReq {
+	prepare := func(_ *jGame) jActionReq {
 		// Define action profile
 		apr := profileDef()
 		return apr
@@ -54,9 +54,9 @@ func playPhase() *jPhase {
 	return p
 }
 
-func profileDef() *jActionReq {
+func profileDef() jActionReq {
 	// TODO: implement
-	r := &jActionReq{}
+	r := &JankenActionRequest{}
 	return r
 }
 

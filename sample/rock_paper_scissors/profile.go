@@ -60,3 +60,12 @@ type JankenActionProfile struct {
 	// Action is an action of the player.
 	Hand Hand
 }
+
+type JankenActionRequest struct{}
+
+func (ar *JankenActionRequest) IsCompleted(ap jAction) bool {
+	// TODO: check if the action is valid
+	return true
+}
+
+var _ jActionReq = &JankenActionRequest{}

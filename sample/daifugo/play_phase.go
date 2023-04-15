@@ -7,10 +7,10 @@ func playPhase() *jPhase {
 	return p
 }
 
-func playPhasePrepare(g *jGame) *jActionReq {
+func playPhasePrepare(g *jGame) jActionReq {
 	_ = g.BoardProfile().turn.Next()
 	// Define action profile
-	apr := &jActionReq{}
+	apr := &daifugoActionRequest{}
 	return apr
 }
 

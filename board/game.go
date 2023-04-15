@@ -58,13 +58,13 @@ func (g *Game[BP, AP]) Play(inputer ActionInputer[AP]) {
 
 // Start returns the initial action profile definition.
 // bool is true if the game continues.
-func (g *Game[BP, AP]) Start() (bool, *ActionRequest[AP]) {
+func (g *Game[BP, AP]) Start() (bool, ActionRequest[AP]) {
 	return g.Next(nil)
 }
 
 // Next returns the next action profile definition.
 // bool is true if the game continues.
-func (g *Game[BP, AP]) Next(ap *ActionProfile[AP]) (bool, *ActionRequest[AP]) {
+func (g *Game[BP, AP]) Next(ap *ActionProfile[AP]) (bool, ActionRequest[AP]) {
 	var next PhaseName
 	if g.gameState.CurrentPhase == nil {
 		next = g.initialPhase
