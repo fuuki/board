@@ -7,8 +7,8 @@ import (
 	"github.com/fuuki/board/board"
 )
 
-var ErrMustNotTakeAction = fmt.Errorf("player must not take action")
-var ErrMustTakeAction = fmt.Errorf("player must take action")
+var ErrMustNotTakeAction = fmt.Errorf("must not take action")
+var ErrMustTakeAction = fmt.Errorf("must take action")
 var ErrInvalidAction = fmt.Errorf("invalid action")
 
 func TurnValid[AP board.PlayerActionDefinition](ap board.ActionProfile[AP], currentPlayer board.Player) error {
@@ -23,12 +23,12 @@ func TurnValid[AP board.PlayerActionDefinition](ap board.ActionProfile[AP], curr
 		} else {
 			// not current player should be nil
 			if !reflect.DeepEqual(a, *new(AP)) {
-				return ErrMustNotTakeAction
+				return fmt.Errorf("player %d %w", p, ErrMustNotTakeAction)
 			}
 		}
 	}
 	if !selected {
-		return ErrMustTakeAction
+		return fmt.Errorf("player %d %w", currentPlayer, ErrMustTakeAction)
 	}
 	return nil
 }

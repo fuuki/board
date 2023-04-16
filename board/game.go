@@ -2,6 +2,7 @@ package board
 
 import (
 	"fmt"
+	"log"
 )
 
 type CurrentPhase struct {
@@ -74,13 +75,13 @@ func (g *Game[BP, AP]) Next(ap *ActionProfile[AP]) (bool, ActionRequest[AP]) {
 		next, bp = phase.execute(g, bp, ap)
 		g.gameState.BoardProfile = bp
 	}
-
-	fmt.Printf("== BoardProfile ==\n%s\n", g.BoardProfile().Show())
+	log.Default().Printf("== BoardProfile ==\n%s\n", g.BoardProfile().Show())
 
 	if next == "" {
 		return false, nil
 	}
 
+	log.Default().Printf("[Phase: %s]", next)
 	nextPhase := g.getPhase(next)
 	apr := nextPhase.prepare(g)
 	g.gameState.CurrentPhase = &CurrentPhase{
