@@ -9,14 +9,14 @@ const (
 	PlayPhase board.PhaseName = "play"
 )
 
-type jGame = board.Game[*daifugoBoardProfile, *daifugoActionProfile]
-type jPhase = board.Phase[*daifugoBoardProfile, *daifugoActionProfile]
-type jAction = board.ActionProfile[*daifugoActionProfile]
-type jActionReq = board.ActionRequest[*daifugoActionProfile]
+type jGame = board.Game[*daifugoBoardProfile, *daifugoPlayerAction]
+type jPhase = board.Phase[*daifugoBoardProfile, *daifugoPlayerAction]
+type jAction = board.ActionProfile[*daifugoPlayerAction]
+type jActionReq = board.ActionRequest[*daifugoPlayerAction]
 
 func Play() {
 	g := daifugoGame()
-	inputer := &board.InteractiveActionInputer[*daifugoActionProfile]{}
+	inputer := &board.InteractiveActionInputer[*daifugoPlayerAction]{}
 	g.Play(inputer)
 }
 
@@ -34,21 +34,6 @@ func daifugoGame() *jGame {
 func resourceProfile() *daifugoBoardProfile {
 	rp := NewDaifugoBoardProfile(2)
 	return rp
-}
-
-// dealPhase returns a phase of deal cards.
-func dealPhase() *jPhase {
-	prepare := func(_ *jGame) jActionReq {
-		apr := &daifugoActionRequest{}
-		return apr
-	}
-
-	execute := func(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.PhaseName, *daifugoBoardProfile) {
-		return PlayPhase, bp
-	}
-
-	p := board.NewPhase(DealPhase, prepare, execute)
-	return p
 }
 
 func resultFn(g *jGame) *board.Result {

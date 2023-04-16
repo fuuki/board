@@ -28,7 +28,7 @@ func Test_daifugoActionRequest_IsValid(t *testing.T) {
 			}(),
 			args: args{
 				ap: *board.NewActionProfileWithAction(
-					[]*daifugoActionProfile{
+					[]*daifugoPlayerAction{
 						nil,
 						{Select: []resource.CardID{"s1"}},
 						nil,
@@ -46,7 +46,7 @@ func Test_daifugoActionRequest_IsValid(t *testing.T) {
 			}(),
 			args: args{
 				ap: *board.NewActionProfileWithAction(
-					[]*daifugoActionProfile{
+					[]*daifugoPlayerAction{
 						nil,
 						{Select: []resource.CardID{"s2"}},
 						nil,
@@ -64,7 +64,7 @@ func Test_daifugoActionRequest_IsValid(t *testing.T) {
 			}(),
 			args: args{
 				ap: *board.NewActionProfileWithAction(
-					[]*daifugoActionProfile{
+					[]*daifugoPlayerAction{
 						nil,
 						{Select: []resource.CardID{}},
 						nil,
@@ -82,7 +82,7 @@ func Test_daifugoActionRequest_IsValid(t *testing.T) {
 			}(),
 			args: args{
 				ap: *board.NewActionProfileWithAction(
-					[]*daifugoActionProfile{
+					[]*daifugoPlayerAction{
 						nil,
 						nil,
 						nil,
@@ -100,7 +100,7 @@ func Test_daifugoActionRequest_IsValid(t *testing.T) {
 			}(),
 			args: args{
 				ap: *board.NewActionProfileWithAction(
-					[]*daifugoActionProfile{
+					[]*daifugoPlayerAction{
 						nil,
 						{Select: []resource.CardID{"s1"}},
 						{Select: []resource.CardID{"s2"}},

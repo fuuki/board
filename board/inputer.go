@@ -42,11 +42,11 @@ func (a *InteractiveActionInputer[AP]) registerAction(ap *ActionProfile[AP], p i
 		return fmt.Errorf("プレイヤー番号は0か1を入力してください。")
 	}
 
-	act := *new(AP)
+	act := new(AP) // ここがポインタかどうかで動かないかも？
 	if err := json.Unmarshal([]byte(str), act); err != nil {
 		return err
 	}
-	ap.SetPlayerAction(Player(p), act)
+	ap.SetPlayerAction(Player(p), *act)
 	return nil
 }
 

@@ -55,15 +55,14 @@ func playPhase() *jPhase {
 }
 
 func profileDef() jActionReq {
-	// TODO: implement
 	r := &JankenActionRequest{}
 	return r
 }
 
 // getReward returns the result of the board.
 func getReward(ap *jAction, rp *JankenBoardProfile) {
-	a0 := (*ap.Player(board.Player(0))).Hand
-	a1 := (*ap.Player(board.Player(1))).Hand
+	a0 := ap.Player(board.Player(0)).Hand
+	a1 := ap.Player(board.Player(1)).Hand
 
 	switch (a0 - a1 + 3) % 3 {
 	case 0:

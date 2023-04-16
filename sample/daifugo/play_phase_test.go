@@ -88,10 +88,10 @@ func Test_playPhaseExecute(t *testing.T) {
 					PlayArea: &resource.CardLine[*Card]{},
 				},
 				ap: func() *jAction {
-					p := &daifugoActionProfile{
+					p := &daifugoPlayerAction{
 						Select: []resource.CardID{"s2"},
 					}
-					ap := board.NewActionProfile[*daifugoActionProfile](2)
+					ap := board.NewActionProfile[*daifugoPlayerAction](2)
 					ap.SetPlayerAction(0, p)
 					return ap
 				}(),

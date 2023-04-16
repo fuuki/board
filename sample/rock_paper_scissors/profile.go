@@ -64,7 +64,12 @@ type JankenActionProfile struct {
 type JankenActionRequest struct{}
 
 func (ar *JankenActionRequest) IsValid(ap jAction) error {
-	// TODO: check if the action is valid
+	// 全プレイヤが手を出しているか
+	for _, a := range ap.PlayerActions() {
+		if a == nil {
+			return fmt.Errorf("not all players have played")
+		}
+	}
 	return nil
 }
 

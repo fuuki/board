@@ -11,6 +11,7 @@ import (
 type daifugoBoardProfile struct {
 	turn        *resource.Turn
 	playerHands map[board.Player]*resource.CardLine[*Card]
+	passMarker  map[board.Player]bool
 	PlayArea    *resource.CardLine[*Card]
 }
 
@@ -38,9 +39,11 @@ func (jp *daifugoBoardProfile) Show() string {
 	return s
 }
 
-type daifugoActionProfile struct {
+type daifugoPlayerAction struct {
 	// Action is an action of the player.
 	Select []resource.CardID
+	// Pass is true if the player pass.
+	Pass bool
 }
 
 type daifugoActionRequest struct {

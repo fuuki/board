@@ -8,7 +8,6 @@ func playPhase() *jPhase {
 }
 
 func playPhasePrepare(g *jGame) jActionReq {
-	_ = g.BoardProfile().turn.Next()
 	// Define action profile
 	apr := &daifugoActionRequest{}
 	return apr
@@ -17,6 +16,22 @@ func playPhasePrepare(g *jGame) jActionReq {
 func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.PhaseName, *daifugoBoardProfile) {
 	p := bp.turn.Current()
 	a := ap.Player(p)
+	if a.Pass {
+		bp.passMarker[p] = true
+		// Find next player
+		var next board.Player
+		for {
+			next = bp.turn.Next()
+			if !bp.passMarker[next] {
+				break
+			}
+		}
+		// All players pass
+		if next == bp.turn.Current() {
+			return DealPhase, bp
+		}
+		return PlayPhase, bp
+	}
 	cards := bp.Player(p).PickMulti((*a).Select)
 	bp.PlayArea.AddMulti(cards)
 	if isFinished(g, bp) {
