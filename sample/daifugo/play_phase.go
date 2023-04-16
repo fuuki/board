@@ -21,7 +21,7 @@ func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.Pha
 	if a.Pass {
 		bp.turn.Pass()
 		if len(bp.turn.Order()) == 1 {
-			// TODO: Go to next round.
+			bp.PrepareNewSequence(g.Players(), 0)
 			return PlayPhase, bp
 		}
 	} else {

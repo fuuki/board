@@ -9,10 +9,17 @@ type Turn struct {
 }
 
 // NewTurn returns a new Turn.
-func NewTurn(order []board.Player) *Turn {
+func NewTurn(order []board.Player, startPlayer board.Player) *Turn {
+	c := 0
+	for i, p := range order {
+		if p == startPlayer {
+			c = i
+			break
+		}
+	}
 	return &Turn{
 		order:   order,
-		current: 0,
+		current: c,
 	}
 }
 
@@ -22,7 +29,7 @@ func NewSimpleTurn(playerNum uint) *Turn {
 	for i := uint(0); i < playerNum; i++ {
 		order[i] = board.Player(i)
 	}
-	return NewTurn(order)
+	return NewTurn(order, 0)
 }
 
 // Next returns the next player.

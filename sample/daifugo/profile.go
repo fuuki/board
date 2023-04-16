@@ -8,6 +8,8 @@ import (
 	"github.com/fuuki/board/resource"
 )
 
+// daifugoBoardProfile is a profile of the board.
+// ゲームはターン、シーケンス、ラウンド、ゲームの4つのレベルで構成される。
 type daifugoBoardProfile struct {
 	turn        *resource.Turn
 	playerHands map[board.Player]*resource.CardLine[*Card]
@@ -23,6 +25,33 @@ func NewDaifugoBoardProfile(playerNum uint) *daifugoBoardProfile {
 		p.playerHands[board.Player(i)] = resource.NewCardLine[*Card](nil)
 	}
 	return p
+}
+
+// PrepareNewRound prepares a new round.
+func (bp *daifugoBoardProfile) PrepareNewRound(
+	players []board.Player,
+	startPlayer board.Player,
+) {
+	// dealCards deals cards to players.
+	// Shuffle cards
+	cards := shortDeck
+
+	// Deal cards
+	c := len(cards) / len(players)
+	for i, p := range players {
+		bp.playerHands[p] = resource.NewCardLine(cards[i*c : (i+1)*c])
+	}
+
+	bp.PrepareNewSequence(players, startPlayer)
+}
+
+// PrepareNewSequence prepares a new sequence.
+func (bp *daifugoBoardProfile) PrepareNewSequence(
+	players []board.Player,
+	startPlayer board.Player,
+) {
+	bp.PlayArea = resource.NewCardLine([]*Card{})
+	bp.turn = resource.NewTurn(players, startPlayer)
 }
 
 func (jp *daifugoBoardProfile) Player(p board.Player) *resource.CardLine[*Card] {
