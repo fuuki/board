@@ -23,6 +23,9 @@ func AssertBoardProfile(t *testing.T, expected, actual *daifugoBoardProfile) {
 	if !expected.PlayArea.Equals(actual.PlayArea) {
 		t.Errorf("expected PlayArea is %v, but got %v", expected.PlayArea, actual.PlayArea)
 	}
+	if !reflect.DeepEqual(expected.turn, actual.turn) {
+		t.Errorf("expected turn is %v, but got %v", expected.turn, actual.turn)
+	}
 }
 
 func Test_playPhaseExecute(t *testing.T) {
@@ -40,25 +43,24 @@ func Test_playPhaseExecute(t *testing.T) {
 		{
 			name: "プレイヤーが s1 を出すと、プレイエリアに s1 が追加される",
 			args: args{
-				g: daifugoGame(),
 				bp: &daifugoBoardProfile{
-					turn: resource.NewSimpleTurn(2),
+					BoardProfileBase: board.NewBoardProfileBase(2),
+					turn:             resource.NewTurn([]board.Player{0, 1}, 0),
 					playerHands: map[board.Player]*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
 							{id: "s1", Suit: Spade, Rank: 1},
 							{id: "s2", Suit: Spade, Rank: 2},
 							{id: "s3", Suit: Spade, Rank: 3},
-							{id: "s4", Suit: Spade, Rank: 4},
 						}),
 						1: resource.NewCardLine([]*Card{
 							{id: "d1", Suit: Diamond, Rank: 1},
 							{id: "d2", Suit: Diamond, Rank: 2},
 							{id: "d3", Suit: Diamond, Rank: 3},
-							{id: "d4", Suit: Diamond, Rank: 4},
 						}),
 					},
-					PlayArea: &resource.CardLine[*Card]{},
-				},
+					PlayArea: resource.NewCardLine([]*Card{
+						{id: "c2", Suit: Club, Rank: 2},
+					})},
 				ap: func() *jAction {
 					p := &daifugoPlayerAction{
 						Select: []resource.CardID{"s2"},
@@ -70,22 +72,116 @@ func Test_playPhaseExecute(t *testing.T) {
 			},
 			want: PlayPhase,
 			want1: &daifugoBoardProfile{
-				turn: resource.NewSimpleTurn(2),
+				turn: resource.NewTurn([]board.Player{0, 1}, 1),
 				playerHands: map[board.Player]*resource.CardLine[*Card]{
 					0: resource.NewCardLine([]*Card{
 						{id: "s1", Suit: Spade, Rank: 1},
 						{id: "s3", Suit: Spade, Rank: 3},
-						{id: "s4", Suit: Spade, Rank: 4},
 					}),
 					1: resource.NewCardLine([]*Card{
 						{id: "d1", Suit: Diamond, Rank: 1},
 						{id: "d2", Suit: Diamond, Rank: 2},
 						{id: "d3", Suit: Diamond, Rank: 3},
-						{id: "d4", Suit: Diamond, Rank: 4},
 					}),
 				},
 				PlayArea: resource.NewCardLine([]*Card{
 					{id: "s2", Suit: Diamond, Rank: 2},
+				}),
+			},
+		},
+		{
+			name: "プレイヤー1がパスし、プレイヤー2の番になる",
+			args: args{
+				bp: &daifugoBoardProfile{
+					BoardProfileBase: board.NewBoardProfileBase(3),
+					turn:             resource.NewTurn([]board.Player{0, 1, 2}, 0),
+					playerHands: map[board.Player]*resource.CardLine[*Card]{
+						0: resource.NewCardLine([]*Card{
+							{id: "s1", Suit: Spade, Rank: 1},
+							{id: "s2", Suit: Spade, Rank: 2},
+							{id: "s3", Suit: Spade, Rank: 3},
+						}),
+						1: resource.NewCardLine([]*Card{
+							{id: "d1", Suit: Diamond, Rank: 1},
+							{id: "d2", Suit: Diamond, Rank: 2},
+							{id: "d3", Suit: Diamond, Rank: 3},
+						}),
+					},
+					PlayArea: resource.NewCardLine([]*Card{
+						{id: "c2", Suit: Club, Rank: 2},
+					}),
+				},
+				ap: func() *jAction {
+					p := &daifugoPlayerAction{
+						Pass: true,
+					}
+					ap := board.NewActionProfile[*daifugoPlayerAction](3)
+					ap.SetPlayerAction(0, p)
+					return ap
+				}(),
+			},
+			want: PlayPhase,
+			want1: &daifugoBoardProfile{
+				turn: resource.NewTurn([]board.Player{1, 2}, 0),
+				playerHands: map[board.Player]*resource.CardLine[*Card]{
+					0: resource.NewCardLine([]*Card{
+						{id: "s1", Suit: Spade, Rank: 1},
+						{id: "s2", Suit: Spade, Rank: 2},
+						{id: "s3", Suit: Spade, Rank: 3},
+					}),
+					1: resource.NewCardLine([]*Card{
+						{id: "d1", Suit: Diamond, Rank: 1},
+						{id: "d2", Suit: Diamond, Rank: 2},
+						{id: "d3", Suit: Diamond, Rank: 3},
+					}),
+				},
+				PlayArea: resource.NewCardLine([]*Card{
+					{id: "c2", Suit: Club, Rank: 2},
+				}),
+			},
+		},
+		{
+			name: "プレイヤーが s1 を出し、ラウンドが終わる",
+			args: args{
+				bp: &daifugoBoardProfile{
+					BoardProfileBase: board.NewBoardProfileBase(2),
+					turn:             resource.NewTurn([]board.Player{0, 1}, 0),
+					playerHands: map[board.Player]*resource.CardLine[*Card]{
+						0: resource.NewCardLine([]*Card{
+							{id: "s1", Suit: Spade, Rank: 1},
+						}),
+						1: resource.NewCardLine([]*Card{
+							{id: "d1", Suit: Diamond, Rank: 1},
+							{id: "d2", Suit: Diamond, Rank: 2},
+							{id: "d3", Suit: Diamond, Rank: 3},
+						}),
+					},
+					PlayArea: resource.NewCardLine([]*Card{
+						{id: "c2", Suit: Club, Rank: 2},
+					}),
+				},
+				ap: func() *jAction {
+					p := &daifugoPlayerAction{
+						Select: []resource.CardID{"s1"},
+					}
+					ap := board.NewActionProfile[*daifugoPlayerAction](2)
+					ap.SetPlayerAction(0, p)
+					return ap
+				}(),
+			},
+			want: "",
+			want1: &daifugoBoardProfile{
+				turn: resource.NewTurn([]board.Player{0, 1}, 0),
+				playerHands: map[board.Player]*resource.CardLine[*Card]{
+					0: resource.NewCardLine([]*Card{}),
+					1: resource.NewCardLine([]*Card{
+						{id: "d1", Suit: Diamond, Rank: 1},
+						{id: "d2", Suit: Diamond, Rank: 2},
+						{id: "d3", Suit: Diamond, Rank: 3},
+					}),
+				},
+				PlayArea: resource.NewCardLine([]*Card{
+					{id: "s1", Suit: Spade, Rank: 1},
 				}),
 			},
 		},

@@ -1,6 +1,9 @@
 package daifugo
 
-import "github.com/fuuki/board/board"
+import (
+	"github.com/fuuki/board/board"
+	"github.com/fuuki/board/resource"
+)
 
 func playPhase() *jPhase {
 	p := board.NewPhase(PlayPhase, playPhasePrepare, playPhaseExecute)
@@ -26,18 +29,18 @@ func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.Pha
 		}
 	} else {
 		cards := bp.Player(p).PickMulti((*a).Select)
-		bp.PlayArea.AddMulti(cards)
-		if isFinished(bp, bp) {
+		bp.PlayArea = resource.NewCardLine(cards)
+		if isFinished(bp) {
 			return "", bp
 		}
+		bp.turn.Next()
 	}
-	bp.turn.Next()
 	return PlayPhase, bp
 }
 
-func isFinished(bp *daifugoBoardProfile, jp *daifugoBoardProfile) bool {
+func isFinished(bp *daifugoBoardProfile) bool {
 	for _, p := range bp.Players() {
-		if len(jp.Player(p).Cards()) == 0 {
+		if len(bp.Player(p).Cards()) == 0 {
 			return true
 		}
 	}
