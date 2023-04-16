@@ -17,12 +17,12 @@ func TurnValid[AP board.PlayerActionDefinition](ap board.ActionProfile[AP], curr
 		p := board.Player(i)
 		if p == currentPlayer {
 			// current player should be not nil
-			if !reflect.DeepEqual(a, *new(AP)) {
+			if !reflect.ValueOf(a).IsZero() {
 				selected = true
 			}
 		} else {
 			// not current player should be nil
-			if !reflect.DeepEqual(a, *new(AP)) {
+			if !reflect.ValueOf(a).IsZero() {
 				return fmt.Errorf("player %d %w", p, ErrMustNotTakeAction)
 			}
 		}
