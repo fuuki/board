@@ -38,3 +38,16 @@ func (t *Turn) Next() board.Player {
 func (t *Turn) Current() board.Player {
 	return t.order[t.current]
 }
+
+// Pass pop the current player from the order.
+func (t *Turn) Pass() {
+	t.order = append(t.order[:t.current], t.order[t.current+1:]...)
+	if t.current >= len(t.order) {
+		t.current = 0
+	}
+}
+
+// Order returns the order of the turn.
+func (t *Turn) Order() []board.Player {
+	return t.order
+}

@@ -1,8 +1,6 @@
 package daifugo
 
 import (
-	"log"
-
 	"github.com/fuuki/board/board"
 	"github.com/fuuki/board/resource"
 )
@@ -10,13 +8,11 @@ import (
 // dealPhase returns a phase of deal cards.
 func dealPhase() *jPhase {
 	prepare := func(_ *jGame) jActionReq {
-		log.Default().Println("Preprae Deal cards")
 		apr := &daifugoActionRequest{}
 		return apr
 	}
 
 	execute := func(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.PhaseName, *daifugoBoardProfile) {
-		log.Default().Println("Execute Deal cards")
 		// Deal cards
 		dealCards(g, bp)
 		return PlayPhase, bp

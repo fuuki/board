@@ -11,7 +11,6 @@ import (
 type daifugoBoardProfile struct {
 	turn        *resource.Turn
 	playerHands map[board.Player]*resource.CardLine[*Card]
-	passMarker  map[board.Player]bool
 	PlayArea    *resource.CardLine[*Card]
 }
 
@@ -34,8 +33,10 @@ func (jp *daifugoBoardProfile) Player(p board.Player) *resource.CardLine[*Card] 
 func (jp *daifugoBoardProfile) Show() string {
 	s := ""
 	for player, hand := range jp.playerHands {
-		s += fmt.Sprintf("Player %d: %v", player, hand)
+		s += fmt.Sprintf("Player %d: %v\n", player, hand)
 	}
+	s += fmt.Sprintf("PlayArea: %v\n", jp.PlayArea)
+	s += fmt.Sprintf("Turn: %v\n", jp.turn)
 	return s
 }
 
