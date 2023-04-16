@@ -24,7 +24,7 @@ func rockPaperScissorsGame() *jGame {
 	rp := resourceProfile()
 
 	p1 := playPhase()
-	g := board.NewGame(2, PLAY_PHASE, []*jPhase{p1}, rp, resultFn)
+	g := board.NewGame(PLAY_PHASE, []*jPhase{p1}, rp, resultFn)
 	return g
 }
 

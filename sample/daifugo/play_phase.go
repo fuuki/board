@@ -21,13 +21,13 @@ func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.Pha
 	if a.Pass {
 		bp.turn.Pass()
 		if len(bp.turn.Order()) == 1 {
-			bp.PrepareNewSequence(g.Players(), 0)
+			bp.PrepareNewSequence(bp.Players(), 0)
 			return PlayPhase, bp
 		}
 	} else {
 		cards := bp.Player(p).PickMulti((*a).Select)
 		bp.PlayArea.AddMulti(cards)
-		if isFinished(g, bp) {
+		if isFinished(bp, bp) {
 			return "", bp
 		}
 	}
@@ -35,8 +35,8 @@ func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.Pha
 	return PlayPhase, bp
 }
 
-func isFinished(g *jGame, jp *daifugoBoardProfile) bool {
-	for _, p := range g.Players() {
+func isFinished(bp *daifugoBoardProfile, jp *daifugoBoardProfile) bool {
+	for _, p := range bp.Players() {
 		if len(jp.Player(p).Cards()) == 0 {
 			return true
 		}

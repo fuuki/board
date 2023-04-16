@@ -13,7 +13,7 @@ func dealPhase() *jPhase {
 
 	execute := func(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.PhaseName, *daifugoBoardProfile) {
 		// Deal cards
-		bp.PrepareNewRound(g.Players(), 0)
+		bp.PrepareNewRound(bp.Players(), 0)
 		return PlayPhase, bp
 	}
 

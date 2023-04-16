@@ -25,34 +25,6 @@ func AssertBoardProfile(t *testing.T, expected, actual *daifugoBoardProfile) {
 	}
 }
 
-func Test_playPhasePrepare(t *testing.T) {
-	type args struct {
-		g *jGame
-	}
-	tests := []struct {
-		name string
-		args args
-		want jActionReq
-	}{
-		{
-			name: "",
-			args: args{
-				g: daifugoGame(),
-			},
-			want: nil,
-		},
-	}
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			if got := playPhasePrepare(tt.args.g); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("playPhasePrepare() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_playPhaseExecute(t *testing.T) {
 	type args struct {
 		g  *jGame

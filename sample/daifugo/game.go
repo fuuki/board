@@ -26,7 +26,7 @@ func daifugoGame() *jGame {
 
 	p1 := dealPhase()
 	p2 := playPhase()
-	g := board.NewGame(2, DealPhase, []*jPhase{p1, p2}, rp, resultFn)
+	g := board.NewGame(DealPhase, []*jPhase{p1, p2}, rp, resultFn)
 	return g
 }
 
@@ -44,7 +44,7 @@ func resultFn(g *jGame) *board.Result {
 		}
 		return 2
 	}
-	for _, p := range g.Players() {
+	for _, p := range g.BoardProfile().Players() {
 		score := -len(g.BoardProfile().Player(p).Cards())
 		r.AddPlayerResult(
 			board.PlayerResult{
