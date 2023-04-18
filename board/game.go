@@ -4,33 +4,33 @@ import (
 	"log"
 )
 
-type Game[BP BoardProfile, AP PlayerActionDefinition] struct {
+type Game[BP BoardProfile, PD PlayerActionDefinition] struct {
 	// definition of games.
 	initialPhase PhaseName
-	phaseMap     []*Phase[BP, AP]
-	resultFn     func(*Game[BP, AP]) *Result
+	phaseMap     []*Phase[BP, PD]
+	resultFn     func(*Game[BP, PD]) *Result
 
 	// dynamic information of games.
-	gameState GameState[BP, AP]
+	gameState GameState[BP, PD]
 }
 
-type GameState[BP BoardProfile, AP PlayerActionDefinition] struct {
+type GameState[BP BoardProfile, PD PlayerActionDefinition] struct {
 	BoardProfile  BP
 	CurrentPhase  PhaseName
-	ActionProfile *ActionProfile[AP]
-	ActionRequest *ActionRequest[AP]
+	ActionProfile *ActionProfile[PD]
+	ActionRequest *ActionRequest[PD]
 }
 
-func NewGame[BP BoardProfile, AP PlayerActionDefinition](
+func NewGame[BP BoardProfile, PD PlayerActionDefinition](
 	initialPhase PhaseName,
-	phases []*Phase[BP, AP],
+	phases []*Phase[BP, PD],
 	boardProfile BP,
-	resultFn func(*Game[BP, AP]) *Result,
-) *Game[BP, AP] {
-	state := GameState[BP, AP]{
+	resultFn func(*Game[BP, PD]) *Result,
+) *Game[BP, PD] {
+	state := GameState[BP, PD]{
 		BoardProfile: boardProfile,
 	}
-	return &Game[BP, AP]{
+	return &Game[BP, PD]{
 		initialPhase: initialPhase,
 		phaseMap:     phases,
 		resultFn:     resultFn,
@@ -39,14 +39,14 @@ func NewGame[BP BoardProfile, AP PlayerActionDefinition](
 }
 
 // Start returns the initial action profile definition.
-func (g *Game[BP, AP]) Start() bool {
+func (g *Game[BP, PD]) Start() bool {
 	g.gameState.CurrentPhase = g.initialPhase
 	g.phasePrepare()
 	return g.travel()
 }
 
 // RegisterAction registers the action of players.
-func (g *Game[BP, AP]) RegisterAction(p Player, a AP) error {
+func (g *Game[BP, PD]) RegisterAction(p Player, a PD) error {
 	err := g.gameState.ActionRequest.IsValidPlayerAction(p, a)
 	if err != nil {
 		return err
@@ -61,7 +61,7 @@ func (g *Game[BP, AP]) RegisterAction(p Player, a AP) error {
 
 // Next returns the next action profile definition.
 // bool is true if the game continues.
-func (g *Game[BP, AP]) Next(ap *ActionProfile[AP]) bool {
+func (g *Game[BP, PD]) Next(ap *ActionProfile[PD]) bool {
 	cnt := g.incrementPhase(ap)
 	if !cnt {
 		return false
@@ -71,7 +71,7 @@ func (g *Game[BP, AP]) Next(ap *ActionProfile[AP]) bool {
 
 // travel travels the game to the next action input phase.
 // bool is true if the game continues.
-func (g *Game[BP, AP]) travel() bool {
+func (g *Game[BP, PD]) travel() bool {
 	for {
 		ap := g.gameState.ActionProfile
 		if err := g.gameState.ActionRequest.IsAllPlayerRegistered(ap); err != nil {
@@ -85,7 +85,7 @@ func (g *Game[BP, AP]) travel() bool {
 }
 
 // incrementPhase increments the phase.
-func (g *Game[BP, AP]) incrementPhase(ap *ActionProfile[AP]) bool {
+func (g *Game[BP, PD]) incrementPhase(ap *ActionProfile[PD]) bool {
 	g.phaseExecute(ap)
 	log.Default().Printf("== BoardProfile ==\n%s\n", g.BoardProfile().Show())
 
@@ -98,17 +98,17 @@ func (g *Game[BP, AP]) incrementPhase(ap *ActionProfile[AP]) bool {
 }
 
 // phasePrepare prepares the action profile definition.
-func (g *Game[BP, AP]) phasePrepare() {
+func (g *Game[BP, PD]) phasePrepare() {
 	name := g.gameState.CurrentPhase
 	log.Default().Printf("[Phase: %s]", name)
 	phase := g.getPhase(name)
 	ar := phase.prepare(g)
 	g.gameState.ActionRequest = ar
-	g.gameState.ActionProfile = NewActionProfile[AP](2) // FIXME: 2 is a number of players.
+	g.gameState.ActionProfile = NewActionProfile[PD](2) // FIXME: 2 is a number of players.
 }
 
 // phaseExecute executes the action profile definition.
-func (g *Game[BP, AP]) phaseExecute(ap *ActionProfile[AP]) {
+func (g *Game[BP, PD]) phaseExecute(ap *ActionProfile[PD]) {
 	phase := g.getPhase(g.gameState.CurrentPhase)
 	bp := g.gameState.BoardProfile
 	next, bp := phase.execute(g, bp, ap)
@@ -116,7 +116,7 @@ func (g *Game[BP, AP]) phaseExecute(ap *ActionProfile[AP]) {
 	g.gameState.CurrentPhase = next
 }
 
-func (g *Game[BP, AP]) getPhase(phaseName PhaseName) *Phase[BP, AP] {
+func (g *Game[BP, PD]) getPhase(phaseName PhaseName) *Phase[BP, PD] {
 	for _, p := range g.phaseMap {
 		if p.name == phaseName {
 			return p
@@ -125,11 +125,11 @@ func (g *Game[BP, AP]) getPhase(phaseName PhaseName) *Phase[BP, AP] {
 	return nil
 }
 
-func (g *Game[BP, AP]) BoardProfile() BP {
+func (g *Game[BP, PD]) BoardProfile() BP {
 	return g.gameState.BoardProfile
 }
 
 // IsOver returns true if the game is over.
-func (g *Game[BP, AP]) IsOver() bool {
+func (g *Game[BP, PD]) IsOver() bool {
 	return g.gameState.CurrentPhase == ""
 }

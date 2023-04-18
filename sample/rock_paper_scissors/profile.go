@@ -12,12 +12,12 @@ type JankenBoardProfile struct {
 	points map[board.Player]*resource.Point
 }
 
-func NewJankenBoardProfile(playerNum uint) *JankenBoardProfile {
+func NewJankenBoardProfile(totalPlayer uint) *JankenBoardProfile {
 	p := &JankenBoardProfile{
-		BoardProfileBase: board.NewBoardProfileBase(playerNum),
+		BoardProfileBase: board.NewBoardProfileBase(totalPlayer),
 		points:           make(map[board.Player]*resource.Point),
 	}
-	for i := 0; i < int(playerNum); i++ {
+	for i := 0; i < int(totalPlayer); i++ {
 		p.points[board.Player(i)] = resource.NewPoint()
 	}
 	return p
@@ -54,7 +54,7 @@ type Hand int
 
 const (
 	ROCK Hand = iota
-	PAPER
+	PPDER
 	SCISSORS
 )
 

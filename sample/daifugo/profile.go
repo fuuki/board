@@ -16,13 +16,13 @@ type daifugoBoardProfile struct {
 	PlayArea    *resource.CardLine[*Card]
 }
 
-func NewDaifugoBoardProfile(playerNum uint) *daifugoBoardProfile {
+func NewDaifugoBoardProfile(totalPlayer uint) *daifugoBoardProfile {
 	p := &daifugoBoardProfile{
-		BoardProfileBase: board.NewBoardProfileBase(playerNum),
-		turn:             resource.NewSimpleTurn(playerNum),
+		BoardProfileBase: board.NewBoardProfileBase(totalPlayer),
+		turn:             resource.NewSimpleTurn(totalPlayer),
 		playerHands:      make(map[board.Player]*resource.CardLine[*Card]),
 	}
-	for i := uint(playerNum); i < playerNum; i++ {
+	for i := uint(totalPlayer); i < totalPlayer; i++ {
 		p.playerHands[board.Player(i)] = resource.NewCardLine[*Card](nil)
 	}
 	return p

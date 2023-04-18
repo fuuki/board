@@ -10,21 +10,21 @@ import (
 
 // TerminalHost is a host of the game.
 // This host is for playing the game in terminal.
-type TerminalHost[BP board.BoardProfile, AP board.PlayerActionDefinition] struct {
-	g *board.Game[BP, AP]
+type TerminalHost[BP board.BoardProfile, PD board.PlayerActionDefinition] struct {
+	g *board.Game[BP, PD]
 }
 
 // NewTerminalHost returns a new host.
-func NewTerminalHost[BP board.BoardProfile, AP board.PlayerActionDefinition](
-	g *board.Game[BP, AP],
-) *TerminalHost[BP, AP] {
-	return &TerminalHost[BP, AP]{
+func NewTerminalHost[BP board.BoardProfile, PD board.PlayerActionDefinition](
+	g *board.Game[BP, PD],
+) *TerminalHost[BP, PD] {
+	return &TerminalHost[BP, PD]{
 		g: g,
 	}
 }
 
 // Play starts the game.
-func (gh *TerminalHost[BP, AP]) Play() {
+func (gh *TerminalHost[BP, PD]) Play() {
 	gh.g.Start()
 	for {
 		p, act, err := gh.entryInput()
@@ -45,7 +45,7 @@ func (gh *TerminalHost[BP, AP]) Play() {
 }
 
 // entryInput returns the input of player and action.
-func (gh *TerminalHost[BP, AP]) entryInput() (board.Player, AP, error) {
+func (gh *TerminalHost[BP, PD]) entryInput() (board.Player, PD, error) {
 	getInput := func() (int, string) {
 		var p int
 		var str string
@@ -61,10 +61,10 @@ func (gh *TerminalHost[BP, AP]) entryInput() (board.Player, AP, error) {
 
 	fmt.Println("プレイヤー番号とアクションを入力してください。 ex: 0 {\"Hand\":1}")
 
-	act := new(AP) // ここがポインタかどうかで動かないかも？
+	act := new(PD) // ここがポインタかどうかで動かないかも？
 	p, str := getInput()
 	if err := json.Unmarshal([]byte(str), act); err != nil {
-		return 0, *new(AP), err
+		return 0, *new(PD), err
 	}
 	return board.Player(p), *act, nil
 }

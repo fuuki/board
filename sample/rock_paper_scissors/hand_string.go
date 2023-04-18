@@ -9,11 +9,11 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[ROCK-0]
-	_ = x[PAPER-1]
+	_ = x[PPDER-1]
 	_ = x[SCISSORS-2]
 }
 
-const _Hand_name = "ROCKPAPERSCISSORS"
+const _Hand_name = "ROCKPPDERSCISSORS"
 
 var _Hand_index = [...]uint8{0, 4, 9, 17}
 

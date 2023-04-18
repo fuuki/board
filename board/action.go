@@ -10,39 +10,39 @@ var ErrNotActionablePlayer = fmt.Errorf("not actionable")
 
 type PlayerActionDefinition interface{}
 
-type actionRequestDefinition[AP PlayerActionDefinition] struct {
+type actionRequestDefinition[PD PlayerActionDefinition] struct {
 	actionable bool
-	validator  func(AP) error
+	validator  func(PD) error
 }
 
-type ActionRequest[AP PlayerActionDefinition] struct {
-	defs map[Player]actionRequestDefinition[AP]
+type ActionRequest[PD PlayerActionDefinition] struct {
+	defs map[Player]actionRequestDefinition[PD]
 }
 
 // NewActionRequest returns a new action request.
-func NewActionRequest[AP PlayerActionDefinition](totalPlayer uint) *ActionRequest[AP] {
-	defs := make(map[Player]actionRequestDefinition[AP], totalPlayer)
+func NewActionRequest[PD PlayerActionDefinition](totalPlayer uint) *ActionRequest[PD] {
+	defs := make(map[Player]actionRequestDefinition[PD], totalPlayer)
 	for i := uint(0); i < totalPlayer; i++ {
-		defs[Player(i)] = actionRequestDefinition[AP]{
+		defs[Player(i)] = actionRequestDefinition[PD]{
 			actionable: false,
-			validator:  func(AP) error { return nil },
+			validator:  func(PD) error { return nil },
 		}
 	}
-	return &ActionRequest[AP]{
+	return &ActionRequest[PD]{
 		defs: defs,
 	}
 }
 
 // RegisterValidator registers the validator for the player.
-func (ar ActionRequest[AP]) RegisterValidator(p Player, fn func(AP) error) {
-	ar.defs[p] = actionRequestDefinition[AP]{
+func (ar ActionRequest[PD]) RegisterValidator(p Player, fn func(PD) error) {
+	ar.defs[p] = actionRequestDefinition[PD]{
 		actionable: true,
 		validator:  fn,
 	}
 }
 
 // IsValidPlayerAction returns nil if the action is valid.
-func (ar ActionRequest[AP]) IsValidPlayerAction(p Player, a AP) error {
+func (ar ActionRequest[PD]) IsValidPlayerAction(p Player, a PD) error {
 	def, ok := ar.defs[p]
 	if !ok {
 		return fmt.Errorf("player %d is %w", p, ErrInvalidPlayer)
@@ -54,7 +54,7 @@ func (ar ActionRequest[AP]) IsValidPlayerAction(p Player, a AP) error {
 }
 
 // IsAllPlayerRegistered returns nil if all players are registered.
-func (ar ActionRequest[AP]) IsAllPlayerRegistered(ap *ActionProfile[AP]) error {
+func (ar ActionRequest[PD]) IsAllPlayerRegistered(ap *ActionProfile[PD]) error {
 	for p, def := range ar.defs {
 		if !def.actionable {
 			continue
@@ -67,37 +67,37 @@ func (ar ActionRequest[AP]) IsAllPlayerRegistered(ap *ActionProfile[AP]) error {
 	return nil
 }
 
-type ActionProfile[AP PlayerActionDefinition] struct {
-	playerActions []AP
+type ActionProfile[PD PlayerActionDefinition] struct {
+	playerActions []PD
 }
 
 // NewActionProfile returns a new action profile.
-func NewActionProfile[AP PlayerActionDefinition](playerNum uint) *ActionProfile[AP] {
-	ap := &ActionProfile[AP]{
-		playerActions: make([]AP, playerNum),
+func NewActionProfile[PD PlayerActionDefinition](totalPlayer uint) *ActionProfile[PD] {
+	ap := &ActionProfile[PD]{
+		playerActions: make([]PD, totalPlayer),
 	}
 	return ap
 }
 
 // NewActionProfileWithAction returns a new action profile with the action.
-func NewActionProfileWithAction[AP PlayerActionDefinition](actions []AP) *ActionProfile[AP] {
-	ap := &ActionProfile[AP]{
+func NewActionProfileWithAction[PD PlayerActionDefinition](actions []PD) *ActionProfile[PD] {
+	ap := &ActionProfile[PD]{
 		playerActions: actions,
 	}
 	return ap
 }
 
 // Player returns the player's action.
-func (ap *ActionProfile[AP]) Player(p Player) AP {
+func (ap *ActionProfile[PD]) Player(p Player) PD {
 	return ap.playerActions[p]
 }
 
 // PlayerActions returns all player's actions.
-func (ap *ActionProfile[AP]) PlayerActions() []AP {
+func (ap *ActionProfile[PD]) PlayerActions() []PD {
 	return ap.playerActions
 }
 
 // SetPlayerAction sets the player's action.
-func (ap *ActionProfile[AP]) SetPlayerAction(p Player, a AP) {
+func (ap *ActionProfile[PD]) SetPlayerAction(p Player, a PD) {
 	ap.playerActions[p] = a
 }

@@ -24,9 +24,9 @@ func NewTurn(order []board.Player, startPlayer board.Player) *Turn {
 }
 
 // NewSimpleTurn returns a new Turn with simple order.
-func NewSimpleTurn(playerNum uint) *Turn {
-	order := make([]board.Player, playerNum)
-	for i := uint(0); i < playerNum; i++ {
+func NewSimpleTurn(totalPlayer uint) *Turn {
+	order := make([]board.Player, totalPlayer)
+	for i := uint(0); i < totalPlayer; i++ {
 		order[i] = board.Player(i)
 	}
 	return NewTurn(order, 0)

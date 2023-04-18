@@ -11,7 +11,7 @@ var ErrMustNotTakeAction = fmt.Errorf("must not take action")
 var ErrMustTakeAction = fmt.Errorf("must take action")
 var ErrInvalidAction = fmt.Errorf("invalid action")
 
-func TurnValid[AP board.PlayerActionDefinition](ap board.ActionProfile[AP], currentPlayer board.Player) error {
+func TurnValid[PD board.PlayerActionDefinition](ap board.ActionProfile[PD], currentPlayer board.Player) error {
 	selected := false
 	for i, a := range ap.PlayerActions() {
 		p := board.Player(i)

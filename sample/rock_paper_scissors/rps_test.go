@@ -19,7 +19,7 @@ func TestRockPaperScissorsGame(t *testing.T) {
 					Hand: ROCK,
 				}
 				a1 := &JankenActionProfile{
-					Hand: PAPER,
+					Hand: PPDER,
 				}
 				ap := board.NewActionProfile[*JankenActionProfile](2)
 				ap.SetPlayerAction(board.Player(0), a0)
