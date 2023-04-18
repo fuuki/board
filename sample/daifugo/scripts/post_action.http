@@ -1,0 +1,23 @@
+###
+POST http://localhost:8080/
+content-type: application/json
+
+{
+    "player": 0,
+    "action": {
+        "pass": false,
+        "select": ["s1"]
+    }
+}
+
+###
+POST http://localhost:8080/
+content-type: application/json
+
+{
+    "player": 1,
+    "action": {
+        "pass": true,
+        "select": []
+    }
+}
