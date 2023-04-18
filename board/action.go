@@ -16,14 +16,14 @@ type actionRequestDefinition[PD PlayerActionDefinition] struct {
 }
 
 type ActionRequest[PD PlayerActionDefinition] struct {
-	defs map[Player]actionRequestDefinition[PD]
+	defs []actionRequestDefinition[PD]
 }
 
 // NewActionRequest returns a new action request.
 func NewActionRequest[PD PlayerActionDefinition](totalPlayer uint) *ActionRequest[PD] {
-	defs := make(map[Player]actionRequestDefinition[PD], totalPlayer)
+	defs := make([]actionRequestDefinition[PD], totalPlayer)
 	for i := uint(0); i < totalPlayer; i++ {
-		defs[Player(i)] = actionRequestDefinition[PD]{
+		defs[i] = actionRequestDefinition[PD]{
 			actionable: false,
 			validator:  func(PD) error { return nil },
 		}
@@ -43,10 +43,10 @@ func (ar ActionRequest[PD]) RegisterValidator(p Player, fn func(PD) error) {
 
 // IsValidPlayerAction returns nil if the action is valid.
 func (ar ActionRequest[PD]) IsValidPlayerAction(p Player, a PD) error {
-	def, ok := ar.defs[p]
-	if !ok {
+	if int(p) >= len(ar.defs) {
 		return fmt.Errorf("player %d is %w", p, ErrInvalidPlayer)
 	}
+	def := ar.defs[p]
 	if !def.actionable {
 		return fmt.Errorf("player %d is %w", p, ErrNotActionablePlayer)
 	}
@@ -59,7 +59,7 @@ func (ar ActionRequest[PD]) IsAllPlayerRegistered(ap *ActionProfile[PD]) error {
 		if !def.actionable {
 			continue
 		}
-		a := ap.Player(p)
+		a := ap.Player(Player(p))
 		if reflect.ValueOf(a).IsZero() {
 			return fmt.Errorf("player %d is not registered", p)
 		}
@@ -90,11 +90,6 @@ func NewActionProfileWithAction[PD PlayerActionDefinition](actions []PD) *Action
 // Player returns the player's action.
 func (ap *ActionProfile[PD]) Player(p Player) PD {
 	return ap.playerActions[p]
-}
-
-// PlayerActions returns all player's actions.
-func (ap *ActionProfile[PD]) PlayerActions() []PD {
-	return ap.playerActions
 }
 
 // SetPlayerAction sets the player's action.
