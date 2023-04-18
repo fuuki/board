@@ -8,14 +8,12 @@ import (
 )
 
 type JankenBoardProfile struct {
-	*board.BoardProfileBase
 	points map[board.Player]*resource.Point
 }
 
 func NewJankenBoardProfile(totalPlayer uint) *JankenBoardProfile {
 	p := &JankenBoardProfile{
-		BoardProfileBase: board.NewBoardProfileBase(totalPlayer),
-		points:           make(map[board.Player]*resource.Point),
+		points: make(map[board.Player]*resource.Point),
 	}
 	for i := 0; i < int(totalPlayer); i++ {
 		p.points[board.Player(i)] = resource.NewPoint()

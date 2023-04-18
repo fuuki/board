@@ -16,7 +16,7 @@ func playPhase() *jPhase {
 
 func playPhasePrepare(g *jGame) *jActionReq {
 	// Define action profile
-	apr := board.NewActionRequest[*daifugoPlayerAction](2) // TODO: fixit
+	apr := board.NewActionRequest[*daifugoPlayerAction](g.TotalPlayer())
 	apr.RegisterValidator(g.BoardProfile().turn.Current(), func(dpa *daifugoPlayerAction) error {
 		if dpa.Pass {
 			return nil
@@ -35,13 +35,13 @@ func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.Pha
 	if a.Pass {
 		bp.turn.Pass()
 		if len(bp.turn.Order()) == 1 {
-			bp.PrepareNewSequence(bp.Players(), 0)
+			bp.PrepareNewSequence(g.Players(), 0)
 			return PlayPhase, bp
 		}
 	} else {
 		cards := bp.Player(p).PickMulti((*a).Select)
 		bp.PlayArea = resource.NewCardLine(cards)
-		if isFinished(bp) {
+		if isFinished(g, bp) {
 			return "", bp
 		}
 		bp.turn.Next()
@@ -49,8 +49,8 @@ func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.Pha
 	return PlayPhase, bp
 }
 
-func isFinished(bp *daifugoBoardProfile) bool {
-	for _, p := range bp.Players() {
+func isFinished(g *jGame, bp *daifugoBoardProfile) bool {
+	for _, p := range g.Players() {
 		if len(bp.Player(p).Cards()) == 0 {
 			return true
 		}

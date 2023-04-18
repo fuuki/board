@@ -43,9 +43,9 @@ func Test_playPhaseExecute(t *testing.T) {
 		{
 			name: "プレイヤーが s1 を出すと、プレイエリアに s1 が追加される",
 			args: args{
+				g: daifugoGame(2),
 				bp: &daifugoBoardProfile{
-					BoardProfileBase: board.NewBoardProfileBase(2),
-					turn:             resource.NewTurn([]board.Player{0, 1}, 0),
+					turn: resource.NewTurn([]board.Player{0, 1}, 0),
 					playerHands: map[board.Player]*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
 							{id: "s1", Suit: Spade, Rank: 1},
@@ -92,9 +92,9 @@ func Test_playPhaseExecute(t *testing.T) {
 		{
 			name: "プレイヤー1がパスし、プレイヤー2の番になる",
 			args: args{
+				g: daifugoGame(2),
 				bp: &daifugoBoardProfile{
-					BoardProfileBase: board.NewBoardProfileBase(3),
-					turn:             resource.NewTurn([]board.Player{0, 1, 2}, 0),
+					turn: resource.NewTurn([]board.Player{0, 1, 2}, 0),
 					playerHands: map[board.Player]*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
 							{id: "s1", Suit: Spade, Rank: 1},
@@ -143,9 +143,9 @@ func Test_playPhaseExecute(t *testing.T) {
 		{
 			name: "プレイヤーが s1 を出し、ラウンドが終わる",
 			args: args{
+				g: daifugoGame(2),
 				bp: &daifugoBoardProfile{
-					BoardProfileBase: board.NewBoardProfileBase(2),
-					turn:             resource.NewTurn([]board.Player{0, 1}, 0),
+					turn: resource.NewTurn([]board.Player{0, 1}, 0),
 					playerHands: map[board.Player]*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
 							{id: "s1", Suit: Spade, Rank: 1},

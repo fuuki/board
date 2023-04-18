@@ -16,24 +16,24 @@ type jAction = board.ActionProfile[*daifugoPlayerAction]
 type jActionReq = board.ActionRequest[*daifugoPlayerAction]
 
 func Play() {
-	g := daifugoGame()
+	g := daifugoGame(2)
 	h := host.NewTerminalHost(g)
 	h.Play()
 }
 
 // daifugoGame returns a game of rock-paper-scissors.
-func daifugoGame() *jGame {
-	rp := resourceProfile()
+func daifugoGame(totalPlayer uint) *jGame {
+	rp := resourceProfile(totalPlayer)
 
 	p1 := dealPhase()
 	p2 := playPhase()
-	g := board.NewGame(DealPhase, []*jPhase{p1, p2}, rp, resultFn)
+	g := board.NewGame(totalPlayer, DealPhase, []*jPhase{p1, p2}, rp, resultFn)
 	return g
 }
 
 // resourceProfile returns a resource profile of rock-paper-scissors.
-func resourceProfile() *daifugoBoardProfile {
-	rp := NewDaifugoBoardProfile(2)
+func resourceProfile(totalPlayer uint) *daifugoBoardProfile {
+	rp := NewDaifugoBoardProfile(totalPlayer)
 	return rp
 }
 
@@ -45,7 +45,7 @@ func resultFn(g *jGame) *board.Result {
 		}
 		return 2
 	}
-	for _, p := range g.BoardProfile().Players() {
+	for _, p := range g.Players() {
 		score := -len(g.BoardProfile().Player(p).Cards())
 		r.AddPlayerResult(
 			board.PlayerResult{

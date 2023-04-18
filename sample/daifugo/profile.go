@@ -10,7 +10,6 @@ import (
 // daifugoBoardProfile is a profile of the board.
 // ゲームはターン、シーケンス、ラウンド、ゲームの4つのレベルで構成される。
 type daifugoBoardProfile struct {
-	*board.BoardProfileBase
 	turn        *resource.Turn
 	playerHands map[board.Player]*resource.CardLine[*Card]
 	PlayArea    *resource.CardLine[*Card]
@@ -18,9 +17,8 @@ type daifugoBoardProfile struct {
 
 func NewDaifugoBoardProfile(totalPlayer uint) *daifugoBoardProfile {
 	p := &daifugoBoardProfile{
-		BoardProfileBase: board.NewBoardProfileBase(totalPlayer),
-		turn:             resource.NewSimpleTurn(totalPlayer),
-		playerHands:      make(map[board.Player]*resource.CardLine[*Card]),
+		turn:        resource.NewSimpleTurn(totalPlayer),
+		playerHands: make(map[board.Player]*resource.CardLine[*Card]),
 	}
 	for i := uint(totalPlayer); i < totalPlayer; i++ {
 		p.playerHands[board.Player(i)] = resource.NewCardLine[*Card](nil)

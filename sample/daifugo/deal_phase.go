@@ -6,14 +6,14 @@ import (
 
 // dealPhase returns a phase of deal cards.
 func dealPhase() *jPhase {
-	prepare := func(_ *jGame) *jActionReq {
-		apr := board.NewActionRequest[*daifugoPlayerAction](2)
+	prepare := func(g *jGame) *jActionReq {
+		apr := board.NewActionRequest[*daifugoPlayerAction](g.TotalPlayer())
 		return apr
 	}
 
 	execute := func(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.PhaseName, *daifugoBoardProfile) {
 		// Deal cards
-		bp.PrepareNewRound(bp.Players(), 0)
+		bp.PrepareNewRound(g.Players(), 0)
 		return PlayPhase, bp
 	}
 

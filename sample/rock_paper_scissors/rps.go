@@ -25,7 +25,7 @@ func rockPaperScissorsGame() *jGame {
 	rp := resourceProfile()
 
 	p1 := playPhase()
-	g := board.NewGame(PLAY_PHASE, []*jPhase{p1}, rp, resultFn)
+	g := board.NewGame(2, PLAY_PHASE, []*jPhase{p1}, rp, resultFn)
 	return g
 }
 
@@ -37,9 +37,9 @@ func resourceProfile() *JankenBoardProfile {
 
 // playPhase returns a phase of rock-paper-scissors.
 func playPhase() *jPhase {
-	prepare := func(_ *jGame) *jActionReq {
+	prepare := func(g *jGame) *jActionReq {
 		// Define action profile
-		apr := profileDef()
+		apr := profileDef(g.TotalPlayer())
 		return apr
 	}
 
@@ -55,11 +55,12 @@ func playPhase() *jPhase {
 	return p
 }
 
-func profileDef() *jActionReq {
-	r := board.NewActionRequest[*JankenActionProfile](2)
+func profileDef(totalPlayer uint) *jActionReq {
+	r := board.NewActionRequest[*JankenActionProfile](totalPlayer)
 	// TODO: define request validation
-	r.RegisterValidator(0, func(a *JankenActionProfile) error { return nil })
-	r.RegisterValidator(1, func(a *JankenActionProfile) error { return nil })
+	for i := 0; i < int(totalPlayer); i++ {
+		r.RegisterValidator(board.Player(i), func(a *JankenActionProfile) error { return nil })
+	}
 	return r
 }
 

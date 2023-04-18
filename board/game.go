@@ -6,6 +6,7 @@ import (
 
 type Game[BP BoardProfile, PD PlayerActionDefinition] struct {
 	// definition of games.
+	totalPlayer  uint
 	initialPhase PhaseName
 	phaseMap     []*Phase[BP, PD]
 	resultFn     func(*Game[BP, PD]) *Result
@@ -22,6 +23,7 @@ type GameState[BP BoardProfile, PD PlayerActionDefinition] struct {
 }
 
 func NewGame[BP BoardProfile, PD PlayerActionDefinition](
+	totalPlayer uint,
 	initialPhase PhaseName,
 	phases []*Phase[BP, PD],
 	boardProfile BP,
@@ -31,6 +33,7 @@ func NewGame[BP BoardProfile, PD PlayerActionDefinition](
 		BoardProfile: boardProfile,
 	}
 	return &Game[BP, PD]{
+		totalPlayer:  totalPlayer,
 		initialPhase: initialPhase,
 		phaseMap:     phases,
 		resultFn:     resultFn,
@@ -104,7 +107,7 @@ func (g *Game[BP, PD]) phasePrepare() {
 	phase := g.getPhase(name)
 	ar := phase.prepare(g)
 	g.gameState.ActionRequest = ar
-	g.gameState.ActionProfile = NewActionProfile[PD](2) // FIXME: 2 is a number of players.
+	g.gameState.ActionProfile = NewActionProfile[PD](g.TotalPlayer())
 }
 
 // phaseExecute executes the action profile definition.
@@ -132,4 +135,18 @@ func (g *Game[BP, PD]) BoardProfile() BP {
 // IsOver returns true if the game is over.
 func (g *Game[BP, PD]) IsOver() bool {
 	return g.gameState.CurrentPhase == ""
+}
+
+// Players returns the array of players.
+func (g *Game[BP, PD]) Players() []Player {
+	result := make([]Player, g.totalPlayer)
+	for i := uint(0); i < g.totalPlayer; i++ {
+		result[i] = Player(i)
+	}
+	return result
+}
+
+// TotalPlayer returns the number of players.
+func (g *Game[BP, PD]) TotalPlayer() uint {
+	return g.totalPlayer
 }
