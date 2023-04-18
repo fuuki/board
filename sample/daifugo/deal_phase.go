@@ -6,8 +6,8 @@ import (
 
 // dealPhase returns a phase of deal cards.
 func dealPhase() *jPhase {
-	prepare := func(_ *jGame) jActionReq {
-		apr := &daifugoActionRequest{}
+	prepare := func(_ *jGame) *jActionReq {
+		apr := board.NewActionRequest[*daifugoPlayerAction](2)
 		return apr
 	}
 

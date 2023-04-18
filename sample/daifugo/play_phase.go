@@ -1,20 +1,31 @@
 package daifugo
 
 import (
+	"errors"
+
 	"github.com/fuuki/board/board"
 	"github.com/fuuki/board/resource"
 )
+
+var ErrNoCardSelected = errors.New("no card selected")
 
 func playPhase() *jPhase {
 	p := board.NewPhase(PlayPhase, playPhasePrepare, playPhaseExecute)
 	return p
 }
 
-func playPhasePrepare(g *jGame) jActionReq {
+func playPhasePrepare(g *jGame) *jActionReq {
 	// Define action profile
-	apr := &daifugoActionRequest{
-		currentPlayer: g.BoardProfile().turn.Current(),
-	}
+	apr := board.NewActionRequest[*daifugoPlayerAction](2) // TODO: fixit
+	apr.RegisterValidator(g.BoardProfile().turn.Current(), func(dpa *daifugoPlayerAction) error {
+		if dpa.Pass {
+			return nil
+		}
+		if len(dpa.Select) == 0 {
+			return ErrNoCardSelected
+		}
+		return nil
+	})
 	return apr
 }
 

@@ -2,6 +2,7 @@ package daifugo
 
 import (
 	"github.com/fuuki/board/board"
+	"github.com/fuuki/board/host"
 )
 
 const (
@@ -16,8 +17,8 @@ type jActionReq = board.ActionRequest[*daifugoPlayerAction]
 
 func Play() {
 	g := daifugoGame()
-	inputer := &board.InteractiveActionInputer[*daifugoPlayerAction]{}
-	g.Play(inputer)
+	h := host.NewTerminalHost(g)
+	h.Play()
 }
 
 // daifugoGame returns a game of rock-paper-scissors.

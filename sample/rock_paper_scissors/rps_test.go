@@ -39,9 +39,10 @@ func TestRockPaperScissorsGame(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			g := rockPaperScissorsGame()
-			aps := tt.aps
-			g.Play(board.NewAutoActionInputer(aps))
-
+			g.Start()
+			for _, ap := range tt.aps {
+				g.Next(ap)
+			}
 			if !g.BoardProfile().Equal(tt.want) {
 				t.Errorf("RockPaperScissorsGame() = %v, want %v", g.BoardProfile(), tt.want)
 			}

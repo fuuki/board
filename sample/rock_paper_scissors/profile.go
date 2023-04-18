@@ -62,17 +62,3 @@ type JankenActionProfile struct {
 	// Action is an action of the player.
 	Hand Hand
 }
-
-type JankenActionRequest struct{}
-
-func (ar *JankenActionRequest) IsValid(ap jAction) error {
-	// 全プレイヤが手を出しているか
-	for _, a := range ap.PlayerActions() {
-		if a == nil {
-			return fmt.Errorf("not all players have played")
-		}
-	}
-	return nil
-}
-
-var _ jActionReq = &JankenActionRequest{}

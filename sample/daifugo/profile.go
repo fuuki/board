@@ -3,7 +3,6 @@ package daifugo
 import (
 	"fmt"
 
-	"github.com/fuuki/board/action"
 	"github.com/fuuki/board/board"
 	"github.com/fuuki/board/resource"
 )
@@ -77,19 +76,3 @@ type daifugoPlayerAction struct {
 	// Pass is true if the player pass.
 	Pass bool
 }
-
-type daifugoActionRequest struct {
-	currentPlayer board.Player
-}
-
-// IsValid returns true if the action profile is completed.
-func (ar *daifugoActionRequest) IsValid(ap jAction) error {
-	err := action.TurnValid(ap, ar.currentPlayer)
-	return err
-}
-
-func (ar *daifugoActionRequest) SetPlayer(p board.Player) {
-	ar.currentPlayer = p
-}
-
-var _ jActionReq = &daifugoActionRequest{}

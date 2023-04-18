@@ -2,6 +2,7 @@ package rock_paper_scissors
 
 import (
 	"github.com/fuuki/board/board"
+	"github.com/fuuki/board/host"
 )
 
 const (
@@ -15,8 +16,8 @@ type jActionReq = board.ActionRequest[*JankenActionProfile]
 
 func Play() {
 	g := rockPaperScissorsGame()
-	inputer := &board.InteractiveActionInputer[*JankenActionProfile]{}
-	g.Play(inputer)
+	h := host.NewTerminalHost(g)
+	h.Play()
 }
 
 // rockPaperScissorsGame returns a game of rock-paper-scissors.
@@ -36,7 +37,7 @@ func resourceProfile() *JankenBoardProfile {
 
 // playPhase returns a phase of rock-paper-scissors.
 func playPhase() *jPhase {
-	prepare := func(_ *jGame) jActionReq {
+	prepare := func(_ *jGame) *jActionReq {
 		// Define action profile
 		apr := profileDef()
 		return apr
@@ -54,8 +55,11 @@ func playPhase() *jPhase {
 	return p
 }
 
-func profileDef() jActionReq {
-	r := &JankenActionRequest{}
+func profileDef() *jActionReq {
+	r := board.NewActionRequest[*JankenActionProfile](2)
+	// TODO: define request validation
+	r.RegisterValidator(0, func(a *JankenActionProfile) error { return nil })
+	r.RegisterValidator(1, func(a *JankenActionProfile) error { return nil })
 	return r
 }
 
