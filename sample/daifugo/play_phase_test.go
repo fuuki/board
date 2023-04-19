@@ -48,18 +48,18 @@ func Test_playPhaseExecute(t *testing.T) {
 					turn: resource.NewTurn([]board.Player{0, 1}, 0),
 					playerHands: map[board.Player]*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
-							{id: "s1", Suit: Spade, Rank: 1},
-							{id: "s2", Suit: Spade, Rank: 2},
-							{id: "s3", Suit: Spade, Rank: 3},
+							{id: "s1", Suit: SuitSpade, Rank: 1},
+							{id: "s2", Suit: SuitSpade, Rank: 2},
+							{id: "s3", Suit: SuitSpade, Rank: 3},
 						}),
 						1: resource.NewCardLine([]*Card{
-							{id: "d1", Suit: Diamond, Rank: 1},
-							{id: "d2", Suit: Diamond, Rank: 2},
-							{id: "d3", Suit: Diamond, Rank: 3},
+							{id: "d1", Suit: SuitDiamond, Rank: 1},
+							{id: "d2", Suit: SuitDiamond, Rank: 2},
+							{id: "d3", Suit: SuitDiamond, Rank: 3},
 						}),
 					},
 					PlayArea: resource.NewCardLine([]*Card{
-						{id: "c2", Suit: Club, Rank: 2},
+						{id: "c2", Suit: SuitClub, Rank: 2},
 					})},
 				ap: func() *jAction {
 					p := &daifugoPlayerAction{
@@ -75,17 +75,17 @@ func Test_playPhaseExecute(t *testing.T) {
 				turn: resource.NewTurn([]board.Player{0, 1}, 1),
 				playerHands: map[board.Player]*resource.CardLine[*Card]{
 					0: resource.NewCardLine([]*Card{
-						{id: "s1", Suit: Spade, Rank: 1},
-						{id: "s3", Suit: Spade, Rank: 3},
+						{id: "s1", Suit: SuitSpade, Rank: 1},
+						{id: "s3", Suit: SuitSpade, Rank: 3},
 					}),
 					1: resource.NewCardLine([]*Card{
-						{id: "d1", Suit: Diamond, Rank: 1},
-						{id: "d2", Suit: Diamond, Rank: 2},
-						{id: "d3", Suit: Diamond, Rank: 3},
+						{id: "d1", Suit: SuitDiamond, Rank: 1},
+						{id: "d2", Suit: SuitDiamond, Rank: 2},
+						{id: "d3", Suit: SuitDiamond, Rank: 3},
 					}),
 				},
 				PlayArea: resource.NewCardLine([]*Card{
-					{id: "s2", Suit: Diamond, Rank: 2},
+					{id: "s2", Suit: SuitDiamond, Rank: 2},
 				}),
 			},
 		},
@@ -97,18 +97,18 @@ func Test_playPhaseExecute(t *testing.T) {
 					turn: resource.NewTurn([]board.Player{0, 1, 2}, 0),
 					playerHands: map[board.Player]*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
-							{id: "s1", Suit: Spade, Rank: 1},
-							{id: "s2", Suit: Spade, Rank: 2},
-							{id: "s3", Suit: Spade, Rank: 3},
+							{id: "s1", Suit: SuitSpade, Rank: 1},
+							{id: "s2", Suit: SuitSpade, Rank: 2},
+							{id: "s3", Suit: SuitSpade, Rank: 3},
 						}),
 						1: resource.NewCardLine([]*Card{
-							{id: "d1", Suit: Diamond, Rank: 1},
-							{id: "d2", Suit: Diamond, Rank: 2},
-							{id: "d3", Suit: Diamond, Rank: 3},
+							{id: "d1", Suit: SuitDiamond, Rank: 1},
+							{id: "d2", Suit: SuitDiamond, Rank: 2},
+							{id: "d3", Suit: SuitDiamond, Rank: 3},
 						}),
 					},
 					PlayArea: resource.NewCardLine([]*Card{
-						{id: "c2", Suit: Club, Rank: 2},
+						{id: "c2", Suit: SuitClub, Rank: 2},
 					}),
 				},
 				ap: func() *jAction {
@@ -125,18 +125,18 @@ func Test_playPhaseExecute(t *testing.T) {
 				turn: resource.NewTurn([]board.Player{1, 2}, 0),
 				playerHands: map[board.Player]*resource.CardLine[*Card]{
 					0: resource.NewCardLine([]*Card{
-						{id: "s1", Suit: Spade, Rank: 1},
-						{id: "s2", Suit: Spade, Rank: 2},
-						{id: "s3", Suit: Spade, Rank: 3},
+						{id: "s1", Suit: SuitSpade, Rank: 1},
+						{id: "s2", Suit: SuitSpade, Rank: 2},
+						{id: "s3", Suit: SuitSpade, Rank: 3},
 					}),
 					1: resource.NewCardLine([]*Card{
-						{id: "d1", Suit: Diamond, Rank: 1},
-						{id: "d2", Suit: Diamond, Rank: 2},
-						{id: "d3", Suit: Diamond, Rank: 3},
+						{id: "d1", Suit: SuitDiamond, Rank: 1},
+						{id: "d2", Suit: SuitDiamond, Rank: 2},
+						{id: "d3", Suit: SuitDiamond, Rank: 3},
 					}),
 				},
 				PlayArea: resource.NewCardLine([]*Card{
-					{id: "c2", Suit: Club, Rank: 2},
+					{id: "c2", Suit: SuitClub, Rank: 2},
 				}),
 			},
 		},
@@ -148,16 +148,16 @@ func Test_playPhaseExecute(t *testing.T) {
 					turn: resource.NewTurn([]board.Player{0, 1}, 0),
 					playerHands: map[board.Player]*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
-							{id: "s1", Suit: Spade, Rank: 1},
+							{id: "s1", Suit: SuitSpade, Rank: 1},
 						}),
 						1: resource.NewCardLine([]*Card{
-							{id: "d1", Suit: Diamond, Rank: 1},
-							{id: "d2", Suit: Diamond, Rank: 2},
-							{id: "d3", Suit: Diamond, Rank: 3},
+							{id: "d1", Suit: SuitDiamond, Rank: 1},
+							{id: "d2", Suit: SuitDiamond, Rank: 2},
+							{id: "d3", Suit: SuitDiamond, Rank: 3},
 						}),
 					},
 					PlayArea: resource.NewCardLine([]*Card{
-						{id: "c2", Suit: Club, Rank: 2},
+						{id: "c2", Suit: SuitClub, Rank: 2},
 					}),
 				},
 				ap: func() *jAction {
@@ -175,13 +175,13 @@ func Test_playPhaseExecute(t *testing.T) {
 				playerHands: map[board.Player]*resource.CardLine[*Card]{
 					0: resource.NewCardLine([]*Card{}),
 					1: resource.NewCardLine([]*Card{
-						{id: "d1", Suit: Diamond, Rank: 1},
-						{id: "d2", Suit: Diamond, Rank: 2},
-						{id: "d3", Suit: Diamond, Rank: 3},
+						{id: "d1", Suit: SuitDiamond, Rank: 1},
+						{id: "d2", Suit: SuitDiamond, Rank: 2},
+						{id: "d3", Suit: SuitDiamond, Rank: 3},
 					}),
 				},
 				PlayArea: resource.NewCardLine([]*Card{
-					{id: "s1", Suit: Spade, Rank: 1},
+					{id: "s1", Suit: SuitSpade, Rank: 1},
 				}),
 			},
 		},
