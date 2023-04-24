@@ -18,25 +18,12 @@ type jAction = board.ActionProfile[*daifugoPlayerAction]
 type jActionReq = board.ActionRequest[*daifugoPlayerAction]
 
 func Play() {
-	g := daifugoGame(2)
-	h := host.NewTerminalHost(g)
-	h.Play()
-}
-
-// daifugoGame returns a game of rock-paper-scissors.
-func daifugoGame(totalPlayer uint) *jGame {
-	rp := resourceProfile(totalPlayer)
-
-	p1 := dealPhase()
-	p2 := playPhase()
-
-	c := make(chan board.PhaseNo)
-
+	g, ch := daifugoGame(2)
 	// phaseNo chan の確認
 	// phaseNo を受け取ったら、それをログに書き出す
 	go func() {
 		for {
-			n, ok := <-c
+			n, ok := <-ch
 			if !ok {
 				log.Default().Printf("[ch] channel closed\n")
 				break
@@ -44,6 +31,18 @@ func daifugoGame(totalPlayer uint) *jGame {
 			log.Default().Printf("[ch] phase changed: %v\n", n)
 		}
 	}()
+	h := host.NewTerminalHost(g)
+	h.Play()
+}
+
+// daifugoGame returns a game of rock-paper-scissors.
+func daifugoGame(totalPlayer uint) (*jGame, <-chan board.PhaseNo) {
+	rp := resourceProfile(totalPlayer)
+
+	p1 := dealPhase()
+	p2 := playPhase()
+
+	c := make(chan board.PhaseNo)
 
 	g := board.NewGame(
 		totalPlayer,
@@ -53,7 +52,7 @@ func daifugoGame(totalPlayer uint) *jGame {
 		resultFn,
 		board.PhaseChangeChan[*daifugoBoardProfile, *daifugoPlayerAction](c),
 	)
-	return g
+	return g, c
 }
 
 // resourceProfile returns a resource profile of rock-paper-scissors.
