@@ -1,6 +1,8 @@
 package daifugo
 
 import (
+	"log"
+
 	"github.com/fuuki/board/board"
 	"github.com/fuuki/board/host"
 )
@@ -27,7 +29,30 @@ func daifugoGame(totalPlayer uint) *jGame {
 
 	p1 := dealPhase()
 	p2 := playPhase()
-	g := board.NewGame(totalPlayer, DealPhase, []*jPhase{p1, p2}, rp, resultFn)
+
+	c := make(chan board.PhaseNo)
+
+	// phaseNo chan の確認
+	// phaseNo を受け取ったら、それをログに書き出す
+	go func() {
+		for {
+			n, ok := <-c
+			if !ok {
+				log.Default().Printf("[ch] channel closed\n")
+				break
+			}
+			log.Default().Printf("[ch] phase changed: %v\n", n)
+		}
+	}()
+
+	g := board.NewGame(
+		totalPlayer,
+		DealPhase,
+		[]*jPhase{p1, p2},
+		rp,
+		resultFn,
+		board.PhaseChangeChan[*daifugoBoardProfile, *daifugoPlayerAction](c),
+	)
 	return g
 }
 
