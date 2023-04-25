@@ -1,5 +1,5 @@
 ###
-POST http://localhost:8080/
+POST http://localhost:8080/action
 content-type: application/json
 
 {
@@ -11,7 +11,7 @@ content-type: application/json
 }
 
 ###
-POST http://localhost:8080/
+POST http://localhost:8080/action
 content-type: application/json
 
 {
@@ -21,6 +21,9 @@ content-type: application/json
         "select": []
     }
 }
+
+###
+GET http://localhost:8080/board
 
 ###
 GET http://localhost:8080/notification

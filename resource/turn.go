@@ -1,6 +1,10 @@
 package resource
 
-import "github.com/fuuki/board/board"
+import (
+	"fmt"
+
+	"github.com/fuuki/board/board"
+)
 
 // Turn is a turn of the game.
 type Turn struct {
@@ -57,4 +61,9 @@ func (t *Turn) Pass() {
 // Order returns the order of the turn.
 func (t *Turn) Order() []board.Player {
 	return t.order
+}
+
+// MarshalJSON implements json.Marshaler.
+func (t *Turn) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("%d", t.current)), nil
 }

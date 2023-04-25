@@ -18,9 +18,9 @@ func TestSortedCards_Power(t *testing.T) {
 			name: "階段",
 			fields: fields{
 				list: []*Card{
-					{id: "h1", Rank: 1, Suit: SuitHeart},
-					{id: "h2", Rank: 2, Suit: SuitHeart},
-					{id: "h3", Rank: 3, Suit: SuitHeart},
+					{CardID: "h1", Rank: 1, Suit: SuitHeart},
+					{CardID: "h2", Rank: 2, Suit: SuitHeart},
+					{CardID: "h3", Rank: 3, Suit: SuitHeart},
 				},
 			},
 			want: &LinePower{
@@ -33,7 +33,7 @@ func TestSortedCards_Power(t *testing.T) {
 			name: "シングル",
 			fields: fields{
 				list: []*Card{
-					{id: "h3", Rank: 3, Suit: SuitHeart},
+					{CardID: "h3", Rank: 3, Suit: SuitHeart},
 				},
 			},
 			want: &LinePower{
@@ -46,8 +46,8 @@ func TestSortedCards_Power(t *testing.T) {
 			name: "ペア",
 			fields: fields{
 				list: []*Card{
-					{id: "h2", Rank: 2, Suit: SuitHeart},
-					{id: "s2", Rank: 2, Suit: SuitSpade},
+					{CardID: "h2", Rank: 2, Suit: SuitHeart},
+					{CardID: "s2", Rank: 2, Suit: SuitSpade},
 				},
 			},
 			want: &LinePower{
@@ -60,9 +60,9 @@ func TestSortedCards_Power(t *testing.T) {
 			name: "[不正]スートが異なる階段",
 			fields: fields{
 				list: []*Card{
-					{id: "h2", Rank: 2, Suit: SuitHeart},
-					{id: "s3", Rank: 3, Suit: SuitSpade},
-					{id: "s4", Rank: 4, Suit: SuitSpade},
+					{CardID: "h2", Rank: 2, Suit: SuitHeart},
+					{CardID: "s3", Rank: 3, Suit: SuitSpade},
+					{CardID: "s4", Rank: 4, Suit: SuitSpade},
 				},
 			},
 			want: nil,
@@ -71,8 +71,8 @@ func TestSortedCards_Power(t *testing.T) {
 			name: "[不正]2枚の階段",
 			fields: fields{
 				list: []*Card{
-					{id: "s3", Rank: 3, Suit: SuitSpade},
-					{id: "s4", Rank: 4, Suit: SuitSpade},
+					{CardID: "s3", Rank: 3, Suit: SuitSpade},
+					{CardID: "s4", Rank: 4, Suit: SuitSpade},
 				},
 			},
 			want: nil,

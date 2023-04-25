@@ -10,18 +10,18 @@ import (
 // daifugoBoardProfile is a profile of the board.
 // ゲームはターン、シーケンス、ラウンド、ゲームの4つのレベルで構成される。
 type daifugoBoardProfile struct {
-	turn        *resource.Turn
-	playerHands map[board.Player]*resource.CardLine[*Card]
-	PlayArea    *resource.CardLine[*Card]
+	Turn        *resource.Turn              `json:"turn"`
+	PlayerHands []*resource.CardLine[*Card] `json:"player_hands"`
+	PlayArea    *resource.CardLine[*Card]   `json:"play_area"`
 }
 
 func NewDaifugoBoardProfile(totalPlayer uint) *daifugoBoardProfile {
 	p := &daifugoBoardProfile{
-		turn:        resource.NewSimpleTurn(totalPlayer),
-		playerHands: make(map[board.Player]*resource.CardLine[*Card]),
+		Turn:        resource.NewSimpleTurn(totalPlayer),
+		PlayerHands: make([]*resource.CardLine[*Card], totalPlayer),
 	}
 	for i := uint(totalPlayer); i < totalPlayer; i++ {
-		p.playerHands[board.Player(i)] = resource.NewCardLine[*Card](nil)
+		p.PlayerHands[board.Player(i)] = resource.NewCardLine[*Card](nil)
 	}
 	return p
 }
@@ -38,7 +38,7 @@ func (bp *daifugoBoardProfile) PrepareNewRound(
 	// Deal cards
 	c := len(cards) / len(players)
 	for i, p := range players {
-		bp.playerHands[p] = resource.NewCardLine(cards[i*c : (i+1)*c])
+		bp.PlayerHands[p] = resource.NewCardLine(cards[i*c : (i+1)*c])
 	}
 
 	bp.PrepareNewSequence(players, startPlayer)
@@ -50,21 +50,21 @@ func (bp *daifugoBoardProfile) PrepareNewSequence(
 	startPlayer board.Player,
 ) {
 	bp.PlayArea = resource.NewCardLine([]*Card{})
-	bp.turn = resource.NewTurn(players, startPlayer)
+	bp.Turn = resource.NewTurn(players, startPlayer)
 }
 
 func (jp *daifugoBoardProfile) Player(p board.Player) *resource.CardLine[*Card] {
-	return jp.playerHands[p]
+	return jp.PlayerHands[p]
 }
 
 // Show print all resources
 func (jp *daifugoBoardProfile) Show() string {
 	s := ""
-	for player, hand := range jp.playerHands {
+	for player, hand := range jp.PlayerHands {
 		s += fmt.Sprintf("Player %d: %v\n", player, hand)
 	}
 	s += fmt.Sprintf("PlayArea: %v\n", jp.PlayArea)
-	s += fmt.Sprintf("Turn: %v\n", jp.turn)
+	s += fmt.Sprintf("Turn: %v\n", jp.Turn)
 	return s
 }
 

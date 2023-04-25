@@ -41,12 +41,13 @@ func NewServer() *Server {
 func (s *Server) NewMux() *http.ServeMux {
 	// ハンドラを登録
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", s.daifugoService)
+	mux.HandleFunc("/action", s.actionService)
+	mux.HandleFunc("/board", s.boardService)
 	mux.HandleFunc("/notification", s.notificationService)
 	return mux
 }
 
-func (s *Server) daifugoService(w http.ResponseWriter, r *http.Request) {
+func (s *Server) actionService(w http.ResponseWriter, r *http.Request) {
 	// POST のみ受け付ける
 	if r.Method != http.MethodPost {
 		log.Default().Printf("method not allowed: %s\n", r.Method)
@@ -68,6 +69,28 @@ func (s *Server) daifugoService(w http.ResponseWriter, r *http.Request) {
 		log.Default().Println(err)
 		return
 	}
+}
+
+// boardService is a service to get a board.
+func (s *Server) boardService(w http.ResponseWriter, r *http.Request) {
+	// GET のみ受け付ける
+	if r.Method != http.MethodGet {
+		log.Default().Printf("method not allowed: %s\n", r.Method)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// ボードを取得
+	b := s.g.BoardProfile()
+	// Json に変換
+	bj, err := json.Marshal(b)
+	if err != nil {
+		log.Default().Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, "%s", string(bj))
 }
 
 // PostActionRequest is a request to post an action.

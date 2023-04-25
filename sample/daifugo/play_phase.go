@@ -17,7 +17,7 @@ func playPhase() *jPhase {
 func playPhasePrepare(g *jGame) *jActionReq {
 	// Define action profile
 	apr := board.NewActionRequest[*daifugoPlayerAction](g.TotalPlayer())
-	apr.RegisterValidator(g.BoardProfile().turn.Current(), func(dpa *daifugoPlayerAction) error {
+	apr.RegisterValidator(g.BoardProfile().Turn.Current(), func(dpa *daifugoPlayerAction) error {
 		if dpa.Pass {
 			return nil
 		}
@@ -30,11 +30,11 @@ func playPhasePrepare(g *jGame) *jActionReq {
 }
 
 func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.PhaseName, *daifugoBoardProfile) {
-	p := bp.turn.Current()
+	p := bp.Turn.Current()
 	a := ap.Player(p)
 	if a.Pass {
-		bp.turn.Pass()
-		if len(bp.turn.Order()) == 1 {
+		bp.Turn.Pass()
+		if len(bp.Turn.Order()) == 1 {
 			bp.PrepareNewSequence(g.Players(), 0)
 			return PlayPhase, bp
 		}
@@ -44,7 +44,7 @@ func playPhaseExecute(g *jGame, bp *daifugoBoardProfile, ap *jAction) (board.Pha
 		if isFinished(g, bp) {
 			return "", bp
 		}
-		bp.turn.Next()
+		bp.Turn.Next()
 	}
 	return PlayPhase, bp
 }

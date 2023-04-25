@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -82,4 +83,9 @@ func (cl *CardLine[C]) String() string {
 	}
 	str := strings.Join(s, ",")
 	return fmt.Sprintf("[%s]", str)
+}
+
+// MarshalJSON implements json.Marshaler.
+func (cl *CardLine[C]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(cl.line)
 }

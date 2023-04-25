@@ -11,11 +11,11 @@ import (
 // AssertBoardProfile checks if two daifugoBoardProfile are equa
 func AssertBoardProfile(t *testing.T, expected, actual *daifugoBoardProfile) {
 	t.Helper()
-	if len(expected.playerHands) != len(actual.playerHands) {
-		t.Errorf("expected playerHands length is %d, but got %d", len(expected.playerHands), len(actual.playerHands))
+	if len(expected.PlayerHands) != len(actual.PlayerHands) {
+		t.Errorf("expected playerHands length is %d, but got %d", len(expected.PlayerHands), len(actual.PlayerHands))
 	}
-	for p, expectedHand := range expected.playerHands {
-		actualHand := actual.playerHands[p]
+	for p, expectedHand := range expected.PlayerHands {
+		actualHand := actual.PlayerHands[p]
 		if !expectedHand.Equals(actualHand) {
 			t.Errorf("expected playerHands is %v, but got %v", expectedHand, actualHand)
 		}
@@ -23,8 +23,8 @@ func AssertBoardProfile(t *testing.T, expected, actual *daifugoBoardProfile) {
 	if !expected.PlayArea.Equals(actual.PlayArea) {
 		t.Errorf("expected PlayArea is %v, but got %v", expected.PlayArea, actual.PlayArea)
 	}
-	if !reflect.DeepEqual(expected.turn, actual.turn) {
-		t.Errorf("expected turn is %v, but got %v", expected.turn, actual.turn)
+	if !reflect.DeepEqual(expected.Turn, actual.Turn) {
+		t.Errorf("expected turn is %v, but got %v", expected.Turn, actual.Turn)
 	}
 }
 
@@ -46,21 +46,21 @@ func Test_playPhaseExecute(t *testing.T) {
 			args: args{
 				g: gm,
 				bp: &daifugoBoardProfile{
-					turn: resource.NewTurn([]board.Player{0, 1}, 0),
-					playerHands: map[board.Player]*resource.CardLine[*Card]{
+					Turn: resource.NewTurn([]board.Player{0, 1}, 0),
+					PlayerHands: []*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
-							{id: "s1", Suit: SuitSpade, Rank: 1},
-							{id: "s2", Suit: SuitSpade, Rank: 2},
-							{id: "s3", Suit: SuitSpade, Rank: 3},
+							{CardID: "s1", Suit: SuitSpade, Rank: 1},
+							{CardID: "s2", Suit: SuitSpade, Rank: 2},
+							{CardID: "s3", Suit: SuitSpade, Rank: 3},
 						}),
 						1: resource.NewCardLine([]*Card{
-							{id: "d1", Suit: SuitDiamond, Rank: 1},
-							{id: "d2", Suit: SuitDiamond, Rank: 2},
-							{id: "d3", Suit: SuitDiamond, Rank: 3},
+							{CardID: "d1", Suit: SuitDiamond, Rank: 1},
+							{CardID: "d2", Suit: SuitDiamond, Rank: 2},
+							{CardID: "d3", Suit: SuitDiamond, Rank: 3},
 						}),
 					},
 					PlayArea: resource.NewCardLine([]*Card{
-						{id: "c2", Suit: SuitClub, Rank: 2},
+						{CardID: "c2", Suit: SuitClub, Rank: 2},
 					})},
 				ap: func() *jAction {
 					p := &daifugoPlayerAction{
@@ -73,20 +73,20 @@ func Test_playPhaseExecute(t *testing.T) {
 			},
 			want: PlayPhase,
 			want1: &daifugoBoardProfile{
-				turn: resource.NewTurn([]board.Player{0, 1}, 1),
-				playerHands: map[board.Player]*resource.CardLine[*Card]{
+				Turn: resource.NewTurn([]board.Player{0, 1}, 1),
+				PlayerHands: []*resource.CardLine[*Card]{
 					0: resource.NewCardLine([]*Card{
-						{id: "s1", Suit: SuitSpade, Rank: 1},
-						{id: "s3", Suit: SuitSpade, Rank: 3},
+						{CardID: "s1", Suit: SuitSpade, Rank: 1},
+						{CardID: "s3", Suit: SuitSpade, Rank: 3},
 					}),
 					1: resource.NewCardLine([]*Card{
-						{id: "d1", Suit: SuitDiamond, Rank: 1},
-						{id: "d2", Suit: SuitDiamond, Rank: 2},
-						{id: "d3", Suit: SuitDiamond, Rank: 3},
+						{CardID: "d1", Suit: SuitDiamond, Rank: 1},
+						{CardID: "d2", Suit: SuitDiamond, Rank: 2},
+						{CardID: "d3", Suit: SuitDiamond, Rank: 3},
 					}),
 				},
 				PlayArea: resource.NewCardLine([]*Card{
-					{id: "s2", Suit: SuitDiamond, Rank: 2},
+					{CardID: "s2", Suit: SuitDiamond, Rank: 2},
 				}),
 			},
 		},
@@ -95,21 +95,21 @@ func Test_playPhaseExecute(t *testing.T) {
 			args: args{
 				g: gm,
 				bp: &daifugoBoardProfile{
-					turn: resource.NewTurn([]board.Player{0, 1, 2}, 0),
-					playerHands: map[board.Player]*resource.CardLine[*Card]{
+					Turn: resource.NewTurn([]board.Player{0, 1, 2}, 0),
+					PlayerHands: []*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
-							{id: "s1", Suit: SuitSpade, Rank: 1},
-							{id: "s2", Suit: SuitSpade, Rank: 2},
-							{id: "s3", Suit: SuitSpade, Rank: 3},
+							{CardID: "s1", Suit: SuitSpade, Rank: 1},
+							{CardID: "s2", Suit: SuitSpade, Rank: 2},
+							{CardID: "s3", Suit: SuitSpade, Rank: 3},
 						}),
 						1: resource.NewCardLine([]*Card{
-							{id: "d1", Suit: SuitDiamond, Rank: 1},
-							{id: "d2", Suit: SuitDiamond, Rank: 2},
-							{id: "d3", Suit: SuitDiamond, Rank: 3},
+							{CardID: "d1", Suit: SuitDiamond, Rank: 1},
+							{CardID: "d2", Suit: SuitDiamond, Rank: 2},
+							{CardID: "d3", Suit: SuitDiamond, Rank: 3},
 						}),
 					},
 					PlayArea: resource.NewCardLine([]*Card{
-						{id: "c2", Suit: SuitClub, Rank: 2},
+						{CardID: "c2", Suit: SuitClub, Rank: 2},
 					}),
 				},
 				ap: func() *jAction {
@@ -123,21 +123,21 @@ func Test_playPhaseExecute(t *testing.T) {
 			},
 			want: PlayPhase,
 			want1: &daifugoBoardProfile{
-				turn: resource.NewTurn([]board.Player{1, 2}, 0),
-				playerHands: map[board.Player]*resource.CardLine[*Card]{
+				Turn: resource.NewTurn([]board.Player{1, 2}, 0),
+				PlayerHands: []*resource.CardLine[*Card]{
 					0: resource.NewCardLine([]*Card{
-						{id: "s1", Suit: SuitSpade, Rank: 1},
-						{id: "s2", Suit: SuitSpade, Rank: 2},
-						{id: "s3", Suit: SuitSpade, Rank: 3},
+						{CardID: "s1", Suit: SuitSpade, Rank: 1},
+						{CardID: "s2", Suit: SuitSpade, Rank: 2},
+						{CardID: "s3", Suit: SuitSpade, Rank: 3},
 					}),
 					1: resource.NewCardLine([]*Card{
-						{id: "d1", Suit: SuitDiamond, Rank: 1},
-						{id: "d2", Suit: SuitDiamond, Rank: 2},
-						{id: "d3", Suit: SuitDiamond, Rank: 3},
+						{CardID: "d1", Suit: SuitDiamond, Rank: 1},
+						{CardID: "d2", Suit: SuitDiamond, Rank: 2},
+						{CardID: "d3", Suit: SuitDiamond, Rank: 3},
 					}),
 				},
 				PlayArea: resource.NewCardLine([]*Card{
-					{id: "c2", Suit: SuitClub, Rank: 2},
+					{CardID: "c2", Suit: SuitClub, Rank: 2},
 				}),
 			},
 		},
@@ -146,19 +146,19 @@ func Test_playPhaseExecute(t *testing.T) {
 			args: args{
 				g: gm,
 				bp: &daifugoBoardProfile{
-					turn: resource.NewTurn([]board.Player{0, 1}, 0),
-					playerHands: map[board.Player]*resource.CardLine[*Card]{
+					Turn: resource.NewTurn([]board.Player{0, 1}, 0),
+					PlayerHands: []*resource.CardLine[*Card]{
 						0: resource.NewCardLine([]*Card{
-							{id: "s1", Suit: SuitSpade, Rank: 1},
+							{CardID: "s1", Suit: SuitSpade, Rank: 1},
 						}),
 						1: resource.NewCardLine([]*Card{
-							{id: "d1", Suit: SuitDiamond, Rank: 1},
-							{id: "d2", Suit: SuitDiamond, Rank: 2},
-							{id: "d3", Suit: SuitDiamond, Rank: 3},
+							{CardID: "d1", Suit: SuitDiamond, Rank: 1},
+							{CardID: "d2", Suit: SuitDiamond, Rank: 2},
+							{CardID: "d3", Suit: SuitDiamond, Rank: 3},
 						}),
 					},
 					PlayArea: resource.NewCardLine([]*Card{
-						{id: "c2", Suit: SuitClub, Rank: 2},
+						{CardID: "c2", Suit: SuitClub, Rank: 2},
 					}),
 				},
 				ap: func() *jAction {
@@ -172,17 +172,17 @@ func Test_playPhaseExecute(t *testing.T) {
 			},
 			want: "",
 			want1: &daifugoBoardProfile{
-				turn: resource.NewTurn([]board.Player{0, 1}, 0),
-				playerHands: map[board.Player]*resource.CardLine[*Card]{
+				Turn: resource.NewTurn([]board.Player{0, 1}, 0),
+				PlayerHands: []*resource.CardLine[*Card]{
 					0: resource.NewCardLine([]*Card{}),
 					1: resource.NewCardLine([]*Card{
-						{id: "d1", Suit: SuitDiamond, Rank: 1},
-						{id: "d2", Suit: SuitDiamond, Rank: 2},
-						{id: "d3", Suit: SuitDiamond, Rank: 3},
+						{CardID: "d1", Suit: SuitDiamond, Rank: 1},
+						{CardID: "d2", Suit: SuitDiamond, Rank: 2},
+						{CardID: "d3", Suit: SuitDiamond, Rank: 3},
 					}),
 				},
 				PlayArea: resource.NewCardLine([]*Card{
-					{id: "s1", Suit: SuitSpade, Rank: 1},
+					{CardID: "s1", Suit: SuitSpade, Rank: 1},
 				}),
 			},
 		},
