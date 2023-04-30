@@ -1,5 +1,9 @@
 package board
 
 type BoardProfile interface {
-	Show() string
+}
+
+type BoardProfileDefinition[BP BoardProfile] interface {
+	New() BP
+	Clone(BP) BP
 }

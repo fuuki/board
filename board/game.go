@@ -4,28 +4,29 @@ import (
 	"log"
 )
 
-type PhaseNo int
+type PeriodCount int
 
 type Game[BP BoardProfile, PD PlayerActionDefinition] struct {
 	// definition of games.
-	totalPlayer  uint
-	initialPhase PhaseName
-	phaseMap     []*Phase[BP, PD]
-	resultFn     func(*Game[BP, PD]) *Result
+	totalPlayer            uint
+	initialPhase           PhaseName
+	boardProfileDefinition BoardProfileDefinition[BP]
+	phaseMap               []*Phase[BP, PD]
 
 	// dynamic information of games.
-	gameState GameState[BP, PD]
+	periodHistory []Period[BP, PD]
 
 	// options
-	phaseChangeChan chan<- PhaseNo
+	phaseChangeChan chan<- PeriodCount
 }
 
-type GameState[BP BoardProfile, PD PlayerActionDefinition] struct {
-	PhaseNo       PhaseNo
-	BoardProfile  BP
-	CurrentPhase  PhaseName
-	ActionProfile *ActionProfile[PD]
-	ActionRequest *ActionRequest[PD]
+// Period is a phase of the game.
+type Period[BP BoardProfile, PD PlayerActionDefinition] struct {
+	count         PeriodCount
+	phase         PhaseName
+	boardProfile  BP
+	actionProfile *ActionProfile[PD]
+	actionRequest *ActionRequest[PD]
 }
 
 type GameOption[BP BoardProfile, PD PlayerActionDefinition] interface {
@@ -34,7 +35,7 @@ type GameOption[BP BoardProfile, PD PlayerActionDefinition] interface {
 
 // phaseChangeChan はフェーズが次に進むときに、フェーズNoをチャネルに送信するオプション.
 type phaseChangeChan[BP BoardProfile, PD PlayerActionDefinition] struct {
-	ch chan<- PhaseNo
+	ch chan<- PeriodCount
 }
 
 // apply はオプションを適用する.
@@ -43,29 +44,26 @@ func (o *phaseChangeChan[BP, PD]) apply(g *Game[BP, PD]) {
 }
 
 // PhaseChangeChan はフェーズが次に進むときに、フェーズNoをチャネルに送信するオプション.
-func PhaseChangeChan[BP BoardProfile, PD PlayerActionDefinition](ch chan<- PhaseNo) GameOption[BP, PD] {
+func PhaseChangeChan[BP BoardProfile, PD PlayerActionDefinition](ch chan<- PeriodCount) GameOption[BP, PD] {
 	return &phaseChangeChan[BP, PD]{
 		ch: ch,
 	}
 }
 
+// NewGame returns a new game.
 func NewGame[BP BoardProfile, PD PlayerActionDefinition](
 	totalPlayer uint,
 	initialPhase PhaseName,
 	phases []*Phase[BP, PD],
-	boardProfile BP,
-	resultFn func(*Game[BP, PD]) *Result,
+	bpd BoardProfileDefinition[BP],
 	options ...GameOption[BP, PD],
 ) *Game[BP, PD] {
-	state := GameState[BP, PD]{
-		BoardProfile: boardProfile,
-	}
 	g := &Game[BP, PD]{
-		totalPlayer:  totalPlayer,
-		initialPhase: initialPhase,
-		phaseMap:     phases,
-		resultFn:     resultFn,
-		gameState:    state,
+		totalPlayer:            totalPlayer,
+		initialPhase:           initialPhase,
+		phaseMap:               phases,
+		boardProfileDefinition: bpd,
+		periodHistory:          []Period[BP, PD]{},
 	}
 	for _, o := range options {
 		o.apply(g)
@@ -73,31 +71,64 @@ func NewGame[BP BoardProfile, PD PlayerActionDefinition](
 	return g
 }
 
+// CurrentPeriod returns the current period.
+func (g *Game[BP, PD]) CurrentPeriod() *Period[BP, PD] {
+	if len(g.periodHistory) == 0 {
+		return nil
+	}
+	return &g.periodHistory[len(g.periodHistory)-1]
+}
+
+// addPeriod adds a period to the game.
+func (g *Game[BP, PD]) addPeriod(phase PhaseName) {
+	var bp BP
+	var count PeriodCount
+	if p := g.CurrentPeriod(); p == nil {
+		bp = g.boardProfileDefinition.New()
+		count = 0
+	} else {
+		bp = g.boardProfileDefinition.Clone(p.boardProfile)
+		count = p.count + 1
+	}
+
+	g.periodHistory = append(g.periodHistory, Period[BP, PD]{
+		count:         count,
+		phase:         phase,
+		boardProfile:  bp,
+		actionProfile: NewActionProfile[PD](g.totalPlayer),
+	})
+}
+
 // Start returns the initial action profile definition.
 func (g *Game[BP, PD]) Start() bool {
-	g.gameState.CurrentPhase = g.initialPhase
+	g.addPeriod(g.initialPhase)
 	g.phasePrepare()
 	return g.travel()
 }
 
 // RegisterAction registers the action of players.
-func (g *Game[BP, PD]) RegisterAction(p Player, a PD) error {
-	err := g.gameState.ActionRequest.IsValidPlayerAction(p, a)
+// It checks whether the action is valid.
+func (g *Game[BP, PD]) RegisterAction(p Player, a PD) (isAllRegistered bool, gameContinues bool, err error) {
+	cp := g.CurrentPeriod()
+	err = cp.actionRequest.IsValidPlayerAction(p, a)
 	if err != nil {
-		return err
+		return
 	}
 
-	g.gameState.ActionProfile.SetPlayerAction(p, a)
-	if err := g.gameState.ActionRequest.IsAllPlayerRegistered(g.gameState.ActionProfile); err == nil {
-		g.Next(g.gameState.ActionProfile)
+	cp.actionProfile.SetPlayerAction(p, a)
+	if err = cp.actionRequest.IsAllPlayerRegistered(cp.actionProfile); err == nil {
+		isAllRegistered = true
+		gameContinues = g.DirectRegisterAction(cp.actionProfile)
+		return
 	}
-	return nil
+	return
 }
 
-// Next returns the next action profile definition.
-// bool is true if the game continues.
-func (g *Game[BP, PD]) Next(ap *ActionProfile[PD]) bool {
-	cnt := g.incrementPhase(ap)
+// DirectRegisterAction registers the action of players.
+// It does not check whether the action is valid.
+// Use it for debugging and testing.
+func (g *Game[BP, PD]) DirectRegisterAction(ap *ActionProfile[PD]) bool {
+	cnt := g.incrementPeriod(ap)
 	if !cnt {
 		return false
 	}
@@ -105,56 +136,60 @@ func (g *Game[BP, PD]) Next(ap *ActionProfile[PD]) bool {
 }
 
 // travel travels the game to the next action input phase.
+// it skips the phase that does not require action input.
 // bool is true if the game continues.
 func (g *Game[BP, PD]) travel() bool {
 	for {
-		ap := g.gameState.ActionProfile
-		if err := g.gameState.ActionRequest.IsAllPlayerRegistered(ap); err != nil {
+		ap := g.CurrentPeriod().actionProfile
+		if err := g.CurrentPeriod().actionRequest.IsAllPlayerRegistered(ap); err != nil {
 			return true
 		}
-		cnt := g.incrementPhase(ap)
+		cnt := g.incrementPeriod(ap)
 		if !cnt {
 			return false
 		}
 	}
 }
 
-// incrementPhase increments the phase.
-func (g *Game[BP, PD]) incrementPhase(ap *ActionProfile[PD]) bool {
-	g.phaseExecute(ap)
-	log.Default().Printf("== BoardProfile ==\n%s\n", g.BoardProfile().Show())
-
-	next := g.gameState.CurrentPhase
+// incrementPeriod increments the phase.
+// bool is true if the game continues.
+func (g *Game[BP, PD]) incrementPeriod(ap *ActionProfile[PD]) bool {
+	// execute the current phase
+	next := g.phaseExecute(ap)
+	// log.Default().Printf("== BoardProfile ==\n%s\n", g.BoardProfile().Show())
 	if next == "" {
 		close(g.phaseChangeChan)
 		return false
 	}
 
-	// increment phase No.
-	g.gameState.PhaseNo++
-	g.phaseChangeChan <- g.gameState.PhaseNo
+	// go to next period
+	g.addPeriod(next)
+	g.phaseChangeChan <- g.CurrentPeriod().count
 
+	// Prepare the next phase
 	g.phasePrepare()
 	return true
 }
 
 // phasePrepare prepares the action profile definition.
 func (g *Game[BP, PD]) phasePrepare() {
-	name := g.gameState.CurrentPhase
-	log.Default().Printf("[Phase: %s]", name)
-	phase := g.getPhase(name)
+	cp := g.CurrentPeriod()
+	log.Default().Printf("[Phase: %s]", cp.phase)
+	phase := g.getPhase(cp.phase)
 	ar := phase.prepare(g)
-	g.gameState.ActionRequest = ar
-	g.gameState.ActionProfile = NewActionProfile[PD](g.TotalPlayer())
+	cp.actionRequest = ar
+	cp.actionProfile = NewActionProfile[PD](g.TotalPlayer())
 }
 
 // phaseExecute executes the action profile definition.
-func (g *Game[BP, PD]) phaseExecute(ap *ActionProfile[PD]) {
-	phase := g.getPhase(g.gameState.CurrentPhase)
-	bp := g.gameState.BoardProfile
+// returns the next phase name.
+func (g *Game[BP, PD]) phaseExecute(ap *ActionProfile[PD]) PhaseName {
+	cp := g.CurrentPeriod()
+	phase := g.getPhase(cp.phase)
+	bp := cp.boardProfile
 	next, bp := phase.execute(g, bp, ap)
-	g.gameState.BoardProfile = bp
-	g.gameState.CurrentPhase = next
+	cp.boardProfile = bp
+	return next
 }
 
 func (g *Game[BP, PD]) getPhase(phaseName PhaseName) *Phase[BP, PD] {
@@ -167,12 +202,12 @@ func (g *Game[BP, PD]) getPhase(phaseName PhaseName) *Phase[BP, PD] {
 }
 
 func (g *Game[BP, PD]) BoardProfile() BP {
-	return g.gameState.BoardProfile
+	return g.CurrentPeriod().boardProfile
 }
 
 // IsOver returns true if the game is over.
 func (g *Game[BP, PD]) IsOver() bool {
-	return g.gameState.CurrentPhase == ""
+	return g.CurrentPeriod().phase == ""
 }
 
 // Players returns the array of players.

@@ -32,7 +32,7 @@ func (gh *TerminalHost[BP, PD]) Play() {
 			log.Default().Println(err)
 			continue
 		}
-		if err := gh.g.RegisterAction(p, act); err != nil {
+		if _, _, err := gh.g.RegisterAction(p, act); err != nil {
 			log.Default().Println(err)
 			continue
 		}
