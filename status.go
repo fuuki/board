@@ -6,9 +6,9 @@ type Status struct {
 }
 
 // NewStatus returns a new status.
-func NewStatus(totalPlayer uint) *Status {
+func NewStatus[BP BoardProfile, PD PlayerActionDefinition](g *Game[BP, PD]) *Status {
 	return &Status{
-		totalPlayer: totalPlayer,
+		totalPlayer: g.totalPlayer,
 	}
 }
 

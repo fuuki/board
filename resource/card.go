@@ -3,6 +3,7 @@ package resource
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -40,14 +41,34 @@ func (cl *CardLine[C]) Cards() []C {
 }
 
 // Pick picks a card from the line.
-func (cl *CardLine[C]) Pick(id CardID) *C {
+func (cl *CardLine[C]) Pick(id CardID) C {
 	for i, c := range cl.line {
 		if c.ID() == id {
 			cl.line = remove(cl.line, i)
-			return &c
+			return c
 		}
 	}
-	return nil
+	return *new(C)
+}
+
+// Draw draws a card from the line.
+func (cl *CardLine[C]) Draw() C {
+	if len(cl.line) == 0 {
+		return *new(C)
+	}
+	c := cl.line[0]
+	cl.line = cl.line[1:]
+	return c
+}
+
+// Has returns true if the line has the card.
+func (cl *CardLine[C]) Has(id CardID) bool {
+	for _, c := range cl.line {
+		if c.ID() == id {
+			return true
+		}
+	}
+	return false
 }
 
 // PickMulti picks multiple cards from the line.
@@ -55,8 +76,8 @@ func (cl *CardLine[C]) PickMulti(ids []CardID) []C {
 	var cards []C
 	for _, id := range ids {
 		c := cl.Pick(id)
-		if c != nil {
-			cards = append(cards, *c)
+		if reflect.ValueOf(c).IsZero() {
+			cards = append(cards, c)
 		}
 	}
 	return cards
@@ -88,4 +109,11 @@ func (cl *CardLine[C]) String() string {
 // MarshalJSON implements json.Marshaler.
 func (cl *CardLine[C]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(cl.line)
+}
+
+// Clone returns a cloned CardLine.
+func (cl *CardLine[C]) Clone() *CardLine[C] {
+	line := make([]C, len(cl.line))
+	copy(line, cl.line)
+	return NewCardLine(line)
 }

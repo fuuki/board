@@ -54,17 +54,17 @@ func (ar ActionRequest[PD]) IsValidPlayerAction(p Player, a PD) error {
 }
 
 // IsAllPlayerRegistered returns nil if all players are registered.
-func (ar ActionRequest[PD]) IsAllPlayerRegistered(ap *ActionProfile[PD]) error {
+func (ar ActionRequest[PD]) IsAllPlayerRegistered(ap *ActionProfile[PD]) bool {
 	for p, def := range ar.defs {
 		if !def.actionable {
 			continue
 		}
 		a := ap.Player(Player(p))
 		if reflect.ValueOf(a).IsZero() {
-			return fmt.Errorf("player %d is not registered", p)
+			return false
 		}
 	}
-	return nil
+	return true
 }
 
 type ActionProfile[PD PlayerActionDefinition] struct {

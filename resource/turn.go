@@ -3,7 +3,7 @@ package resource
 import (
 	"fmt"
 
-	"github.com/fuuki/board/board"
+	"github.com/fuuki/board"
 )
 
 // Turn is a turn of the game.

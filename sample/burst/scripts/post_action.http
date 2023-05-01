@@ -1,0 +1,28 @@
+###
+POST http://localhost:8080/action
+content-type: application/json
+
+{
+    "player": 0,
+    "action": {
+        "select": "-5"
+    }
+}
+
+###
+POST http://localhost:8080/action
+content-type: application/json
+
+{
+    "player": 1,
+    "action": {
+        "select": "-1"
+    }
+}
+
+###
+GET http://localhost:8080/board
+
+###
+GET http://localhost:8080/notification
+

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/fuuki/board/board"
+	"github.com/fuuki/board"
 )
 
 func TestTurn_Next(t *testing.T) {
