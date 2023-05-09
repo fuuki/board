@@ -69,7 +69,7 @@ type PeriodExecuteResult struct {
 	NextPhase   PhaseName
 }
 
-// executeChallenge applies the action.
+// executeChallenge executes if the period action is completed.
 func (p *Period[BP, PD]) executeChallenge() *PeriodExecuteResult {
 	// check whether the action is valid
 	if ok := p.actionRequest.IsAllPlayerRegistered(p.actionProfile); !ok {
@@ -78,6 +78,9 @@ func (p *Period[BP, PD]) executeChallenge() *PeriodExecuteResult {
 			NextPhase:   "",
 		}
 	}
+
+	// set the nature action
+	p.actionProfile.natureActions = p.actionRequest.naturalPlayer.GetResults()
 
 	// apply the action
 	next, bp := p.phase.execute(p.status, p.boardProfile, p.actionProfile)

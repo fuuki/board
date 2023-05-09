@@ -3,6 +3,8 @@ package board
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/fuuki/board/internal/action"
 )
 
 var ErrInvalidPlayer = fmt.Errorf("invalid player")
@@ -16,7 +18,8 @@ type actionRequestDefinition[PD PlayerActionDefinition] struct {
 }
 
 type ActionRequest[PD PlayerActionDefinition] struct {
-	defs []actionRequestDefinition[PD]
+	defs          []actionRequestDefinition[PD]
+	naturalPlayer *action.NaturalPlayer
 }
 
 // NewActionRequest returns a new action request.
@@ -28,8 +31,10 @@ func NewActionRequest[PD PlayerActionDefinition](totalPlayer uint) *ActionReques
 			validator:  func(PD) error { return nil },
 		}
 	}
+	naturalPlayer := action.NewNaturalPlayer()
 	return &ActionRequest[PD]{
-		defs: defs,
+		defs:          defs,
+		naturalPlayer: naturalPlayer,
 	}
 }
 
@@ -39,6 +44,16 @@ func (ar ActionRequest[PD]) RegisterValidator(p Player, fn func(PD) error) {
 		actionable: true,
 		validator:  fn,
 	}
+}
+
+// AddDice adds dice to the nature's action.
+func (ar ActionRequest[PD]) AddDice(name string, numDice int, numFace int) {
+	ar.naturalPlayer.AddDice(name, numDice, numFace)
+}
+
+// AddShuffle adds shuffle to the nature's action.
+func (ar ActionRequest[PD]) AddShuffle(name string, numCard int) {
+	ar.naturalPlayer.AddShuffle(name, numCard)
 }
 
 // IsValidPlayerAction returns nil if the action is valid.
@@ -69,6 +84,7 @@ func (ar ActionRequest[PD]) IsAllPlayerRegistered(ap *ActionProfile[PD]) bool {
 
 type ActionProfile[PD PlayerActionDefinition] struct {
 	playerActions []PD
+	natureActions map[string][]int
 }
 
 // NewActionProfile returns a new action profile.
@@ -95,4 +111,9 @@ func (ap *ActionProfile[PD]) Player(p Player) PD {
 // SetPlayerAction sets the player's action.
 func (ap *ActionProfile[PD]) SetPlayerAction(p Player, a PD) {
 	ap.playerActions[p] = a
+}
+
+// NatureActionResult returns the nature's action result.
+func (ap *ActionProfile[PD]) NatureActionResult() map[string][]int {
+	return ap.natureActions
 }

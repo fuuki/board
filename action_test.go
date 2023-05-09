@@ -1,1 +1,1 @@
-package board
+package board_test
