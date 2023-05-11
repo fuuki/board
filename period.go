@@ -1,7 +1,7 @@
 package board
 
-// Period is a phase of the game.
-type Period[BP BoardProfile, PD PlayerActionDefinition] struct {
+// period is a phase of the game.
+type period[BP BoardProfile, PD PlayerActionDefinition] struct {
 	count         PeriodCount
 	phase         *Phase[BP, PD]
 	boardProfile  BP
@@ -10,15 +10,15 @@ type Period[BP BoardProfile, PD PlayerActionDefinition] struct {
 	status        *Status
 }
 
-// NewFirstPeriod returns a new period.
-func NewFirstPeriod[BP BoardProfile, PD PlayerActionDefinition](
+// newFirstPeriod returns a new period.
+func newFirstPeriod[BP BoardProfile, PD PlayerActionDefinition](
 	phase *Phase[BP, PD],
 	bpd BoardProfileDefinition[BP],
 	status *Status,
-) (*Period[BP, PD], *PeriodExecuteResult) {
+) (*period[BP, PD], *periodExecuteResult) {
 	bp := bpd.New()
 	ar, bp := phase.prepare(status, bp)
-	p := &Period[BP, PD]{
+	p := &period[BP, PD]{
 		count:         0,
 		phase:         phase,
 		boardProfile:  bp,
@@ -30,16 +30,16 @@ func NewFirstPeriod[BP BoardProfile, PD PlayerActionDefinition](
 	return p, r
 }
 
-// NewContinuePeriod returns a new period.
-func NewContinuePeriod[BP BoardProfile, PD PlayerActionDefinition](
+// newContinuePeriod returns a new period.
+func newContinuePeriod[BP BoardProfile, PD PlayerActionDefinition](
 	count PeriodCount,
 	phase *Phase[BP, PD],
 	boardProfile BP,
 	status *Status,
-) (*Period[BP, PD], *PeriodExecuteResult) {
+) (*period[BP, PD], *periodExecuteResult) {
 	ar, bp := phase.prepare(status, boardProfile)
 
-	p := &Period[BP, PD]{
+	p := &period[BP, PD]{
 		count:         count,
 		phase:         phase,
 		boardProfile:  bp,
@@ -52,9 +52,9 @@ func NewContinuePeriod[BP BoardProfile, PD PlayerActionDefinition](
 }
 
 // registerAction registers an action.
-func (p *Period[BP, PD]) registerAction(player Player, action PD) (*PeriodExecuteResult, error) {
+func (p *period[BP, PD]) registerAction(player Player, action PD) (*periodExecuteResult, error) {
 	// check whether the action is valid
-	err := p.actionRequest.IsValidPlayerAction(player, action)
+	err := p.actionRequest.isValidPlayerAction(player, action)
 	if err != nil {
 		return nil, err
 	}
@@ -64,16 +64,16 @@ func (p *Period[BP, PD]) registerAction(player Player, action PD) (*PeriodExecut
 	return p.executeChallenge(), nil
 }
 
-type PeriodExecuteResult struct {
+type periodExecuteResult struct {
 	IsCompleted bool
 	NextPhase   PhaseName
 }
 
 // executeChallenge executes if the period action is completed.
-func (p *Period[BP, PD]) executeChallenge() *PeriodExecuteResult {
+func (p *period[BP, PD]) executeChallenge() *periodExecuteResult {
 	// check whether the action is valid
-	if ok := p.actionRequest.IsAllPlayerRegistered(p.actionProfile); !ok {
-		return &PeriodExecuteResult{
+	if ok := p.actionRequest.isAllPlayerRegistered(p.actionProfile); !ok {
+		return &periodExecuteResult{
 			IsCompleted: false,
 			NextPhase:   "",
 		}
@@ -85,7 +85,7 @@ func (p *Period[BP, PD]) executeChallenge() *PeriodExecuteResult {
 	// apply the action
 	next, bp := p.phase.execute(p.status, p.boardProfile, p.actionProfile)
 	p.boardProfile = bp
-	return &PeriodExecuteResult{
+	return &periodExecuteResult{
 		IsCompleted: true,
 		NextPhase:   next,
 	}

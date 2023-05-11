@@ -56,8 +56,8 @@ func (ar ActionRequest[PD]) AddShuffle(name string, numCard int) {
 	ar.naturalPlayer.AddShuffle(name, numCard)
 }
 
-// IsValidPlayerAction returns nil if the action is valid.
-func (ar ActionRequest[PD]) IsValidPlayerAction(p Player, a PD) error {
+// isValidPlayerAction returns nil if the action is valid.
+func (ar ActionRequest[PD]) isValidPlayerAction(p Player, a PD) error {
 	if int(p) >= len(ar.defs) {
 		return fmt.Errorf("player %d is %w", p, ErrInvalidPlayer)
 	}
@@ -68,8 +68,8 @@ func (ar ActionRequest[PD]) IsValidPlayerAction(p Player, a PD) error {
 	return def.validator(a)
 }
 
-// IsAllPlayerRegistered returns nil if all players are registered.
-func (ar ActionRequest[PD]) IsAllPlayerRegistered(ap *ActionProfile[PD]) bool {
+// isAllPlayerRegistered returns nil if all players are registered.
+func (ar ActionRequest[PD]) isAllPlayerRegistered(ap *ActionProfile[PD]) bool {
 	for p, def := range ar.defs {
 		if !def.actionable {
 			continue
@@ -95,14 +95,6 @@ func NewActionProfile[PD PlayerActionDefinition](totalPlayer uint) *ActionProfil
 	return ap
 }
 
-// NewActionProfileWithAction returns a new action profile with the action.
-func NewActionProfileWithAction[PD PlayerActionDefinition](actions []PD) *ActionProfile[PD] {
-	ap := &ActionProfile[PD]{
-		playerActions: actions,
-	}
-	return ap
-}
-
 // Player returns the player's action.
 func (ap *ActionProfile[PD]) Player(p Player) PD {
 	return ap.playerActions[p]
@@ -114,6 +106,6 @@ func (ap *ActionProfile[PD]) SetPlayerAction(p Player, a PD) {
 }
 
 // NatureActionResult returns the nature's action result.
-func (ap *ActionProfile[PD]) NatureActionResult() map[string][]int {
-	return ap.natureActions
+func (ap *ActionProfile[PD]) NatureActionResult(name string) []int {
+	return ap.natureActions[name]
 }

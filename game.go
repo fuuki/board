@@ -14,7 +14,7 @@ type Game[BP BoardProfile, PD PlayerActionDefinition] struct {
 	totalPlayer            uint
 
 	// dynamic information of games.
-	periodHistory []*Period[BP, PD]
+	periodHistory []*period[BP, PD]
 	isOver        bool
 
 	// options
@@ -57,7 +57,7 @@ func NewGame[BP BoardProfile, PD PlayerActionDefinition](
 		initialPhase:           initialPhase,
 		phaseMap:               phases,
 		boardProfileDefinition: bpd,
-		periodHistory:          []*Period[BP, PD]{},
+		periodHistory:          []*period[BP, PD]{},
 	}
 	for _, o := range options {
 		o.apply(g)
@@ -75,8 +75,8 @@ func (g *Game[BP, PD]) InitGame() {
 // createFirstPeriod creates the first period.
 func (g *Game[BP, PD]) createFirstPeriod() {
 	phase := g.getPhase(g.initialPhase)
-	period, result := NewFirstPeriod(phase, g.boardProfileDefinition, g.Status())
-	g.registerPeriod(period)
+	pr, result := newFirstPeriod(phase, g.boardProfileDefinition, g.Status())
+	g.registerPeriod(pr)
 
 	if result.IsCompleted {
 		g.afterPeriodCompleted(result.NextPhase)
@@ -89,8 +89,8 @@ func (g *Game[BP, PD]) createContinuePeriod(phaseName PhaseName) {
 	count := g.currentPeriod().count + 1
 	bp := g.boardProfileDefinition.Clone(g.currentPeriod().boardProfile)
 
-	period, result := NewContinuePeriod(count, phase, bp, g.Status())
-	g.registerPeriod(period)
+	pr, result := newContinuePeriod(count, phase, bp, g.Status())
+	g.registerPeriod(pr)
 
 	if result.IsCompleted {
 		g.afterPeriodCompleted(result.NextPhase)
@@ -98,11 +98,11 @@ func (g *Game[BP, PD]) createContinuePeriod(phaseName PhaseName) {
 }
 
 // registerPeriod adds a new period to the game.
-func (g *Game[BP, PD]) registerPeriod(period *Period[BP, PD]) {
+func (g *Game[BP, PD]) registerPeriod(pr *period[BP, PD]) {
 	if g.phaseChangeChan != nil {
-		g.phaseChangeChan <- period.count
+		g.phaseChangeChan <- pr.count
 	}
-	g.periodHistory = append(g.periodHistory, period)
+	g.periodHistory = append(g.periodHistory, pr)
 }
 
 // RegisterAction registers the action of players.
@@ -132,14 +132,6 @@ func (g *Game[BP, PD]) afterPeriodCompleted(nextPhase PhaseName) {
 	g.createContinuePeriod(nextPhase)
 }
 
-// DirectRegisterAction registers the action of players.
-// It does not check whether the action is valid.
-// Use it for debugging and testing.
-func (g *Game[BP, PD]) DirectRegisterAction(ap *ActionProfile[PD]) error {
-	// TODO: implement
-	return nil
-}
-
 func (g *Game[BP, PD]) getPhase(phaseName PhaseName) *Phase[BP, PD] {
 	for _, p := range g.phaseMap {
 		if p.name == phaseName {
@@ -150,7 +142,7 @@ func (g *Game[BP, PD]) getPhase(phaseName PhaseName) *Phase[BP, PD] {
 }
 
 // currentPeriod returns the current period.
-func (g *Game[BP, PD]) currentPeriod() *Period[BP, PD] {
+func (g *Game[BP, PD]) currentPeriod() *period[BP, PD] {
 	if len(g.periodHistory) == 0 {
 		return nil
 	}
@@ -160,15 +152,6 @@ func (g *Game[BP, PD]) currentPeriod() *Period[BP, PD] {
 // IsOver returns true if the game is over.
 func (g *Game[BP, PD]) IsOver() bool {
 	return g.isOver
-}
-
-// Players returns the array of players.
-func (g *Game[BP, PD]) Players() []Player {
-	result := make([]Player, g.Status().TotalPlayer())
-	for i := uint(0); i < g.Status().TotalPlayer(); i++ {
-		result[i] = Player(i)
-	}
-	return result
 }
 
 // Status returns the current status.

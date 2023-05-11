@@ -3,6 +3,7 @@ package action
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
 
 var ErrInvalidParameter = fmt.Errorf("invalid parameter")
@@ -89,7 +90,8 @@ func (s *shuffle) action() []int {
 	for i := 0; i < s.numCard; i++ {
 		result[i] = i
 	}
-	rand.Shuffle(len(result), func(i, j int) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	r.Shuffle(len(result), func(i, j int) {
 		result[i], result[j] = result[j], result[i]
 	})
 	return result
