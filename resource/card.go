@@ -96,6 +96,20 @@ func (cl *CardLine[C]) Equals(other *CardLine[C]) bool {
 	return true
 }
 
+// Len returns the length of the line.
+func (cl *CardLine[C]) Len() int {
+	return len(cl.line)
+}
+
+// ApplyShuffle applies a shuffle to the line.
+func (cl *CardLine[C]) ApplyShuffle(shuffleIndexes []int) {
+	var line = make([]C, len(cl.line))
+	for i, si := range shuffleIndexes {
+		line[i] = cl.line[si]
+	}
+	cl.line = line
+}
+
 // String returns a string representation of the line.
 func (cl *CardLine[C]) String() string {
 	var s []string

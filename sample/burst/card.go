@@ -3,7 +3,7 @@ package burst
 import (
 	"fmt"
 
-	"github.com/fuuki/board"
+	"github.com/fuuki/board/logic"
 	"github.com/fuuki/board/resource"
 )
 
@@ -23,7 +23,7 @@ func (c *Card) ID() resource.CardID {
 // PlayedCard is a played card.
 type PlayedCard struct {
 	Card   *Card        `json:"card"`
-	Player board.Player `json:"player"`
+	Player logic.Player `json:"player"`
 }
 
 func newDeck() []*Card {

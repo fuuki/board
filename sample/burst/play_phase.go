@@ -4,27 +4,35 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/fuuki/board"
+	"github.com/fuuki/board/logic"
 )
 
 var ErrNoCardSelected = errors.New("no card selected")
 var ErrInvalidCard = errors.New("invalid card")
 
-func playPhase() *jPhase {
-	p := board.NewPhase(PlayPhase, playPhasePrepare, playPhaseExecute)
-	return p
+type playPhase struct{}
+
+var _ jPhase = (*playPhase)(nil)
+
+// Name returns a phase name.
+func (p *playPhase) Name() logic.PhaseName {
+	return PlayPhase
 }
 
-func playPhasePrepare(st *board.Status, bp *burstBoardProfile) (*jActionReq, *burstBoardProfile) {
+// Prepare implements Phase.Prepare.
+func (p *playPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*logic.ActionRequest[*burstPlayerAction], *burstBoardProfile) {
 	// Define action profile
-	apr := board.NewActionRequest[*burstPlayerAction](st.TotalPlayer())
-	for p := 0; p < int(st.TotalPlayer()); p++ {
+	apr := logic.NewActionRequest[*burstPlayerAction](config.TotalPlayer())
+	for p := 0; p < int(config.TotalPlayer()); p++ {
 		p := p
-		apr.RegisterValidator(board.Player(p), func(a *burstPlayerAction) error {
+		apr.RegisterValidator(logic.Player(p), func(a *burstPlayerAction) error {
+			if a == nil {
+				return ErrNoCardSelected
+			}
 			if a.Select == "" {
 				return ErrNoCardSelected
 			}
-			if !bp.PlayerHands[board.Player(p)].Has(a.Select) {
+			if !bp.PlayerHands[logic.Player(p)].Has(a.Select) {
 				return ErrInvalidCard
 			}
 			return nil
@@ -33,15 +41,15 @@ func playPhasePrepare(st *board.Status, bp *burstBoardProfile) (*jActionReq, *bu
 	return apr, bp
 }
 
-func playPhaseExecute(st *board.Status, bp *burstBoardProfile, ap *jAction) (board.PhaseName, *burstBoardProfile) {
+func (p *playPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *logic.ActionProfile[*burstPlayerAction]) (logic.PhaseName, *burstBoardProfile) {
 	// 出したカードをプレイエリアに移動
-	played := make([]*PlayedCard, st.TotalPlayer())
-	for p := 0; p < int(st.TotalPlayer()); p++ {
-		id := ap.Player(board.Player(p)).Select
-		c := bp.PlayerHands[board.Player(p)].Pick(id)
+	played := make([]*PlayedCard, config.TotalPlayer())
+	for p := 0; p < int(config.TotalPlayer()); p++ {
+		id := ap.Player(logic.Player(p)).Select
+		c := bp.PlayerHands[logic.Player(p)].Pick(id)
 		played[p] = &PlayedCard{
 			Card:   c,
-			Player: board.Player(p),
+			Player: logic.Player(p),
 		}
 	}
 	// 数字が小さい順に並べる
@@ -58,8 +66,8 @@ func playPhaseExecute(st *board.Status, bp *burstBoardProfile, ap *jAction) (boa
 	}
 
 	// カードを補充
-	for p := 0; p < int(st.TotalPlayer()); p++ {
-		bp.PlayerHands[board.Player(p)].Add(bp.Deck.Draw())
+	for p := 0; p < int(config.TotalPlayer()); p++ {
+		bp.PlayerHands[logic.Player(p)].Add(bp.Deck.Draw())
 	}
 	return PlayPhase, bp
 }

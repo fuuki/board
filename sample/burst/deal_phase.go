@@ -1,33 +1,41 @@
 package burst
 
 import (
-	"github.com/fuuki/board"
+	"github.com/fuuki/board/logic"
 	"github.com/fuuki/board/resource"
 )
 
-// dealPhase returns a phase of deal cards.
-func dealPhase() *jPhase {
-	prepare := func(st *board.Status, bp *burstBoardProfile) (*jActionReq, *burstBoardProfile) {
-		apr := board.NewActionRequest[*burstPlayerAction](st.TotalPlayer())
-		return apr, bp
-	}
+type dealPhase struct{}
 
-	execute := func(st *board.Status, bp *burstBoardProfile, ap *jAction) (board.PhaseName, *burstBoardProfile) {
-		bp.dealCards(st.TotalPlayer())
-		return PlayPhase, bp
-	}
+var _ jPhase = (*dealPhase)(nil)
 
-	p := board.NewPhase(DealPhase, prepare, execute)
-	return p
+// Name implement Phase.Name.
+func (d *dealPhase) Name() logic.PhaseName {
+	return DealPhase
+}
+
+// Prepare implement Phase.Prepare.
+func (d *dealPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*logic.ActionRequest[*burstPlayerAction], *burstBoardProfile) {
+	apr := logic.NewActionRequest[*burstPlayerAction](config.TotalPlayer())
+	bp.Deck = resource.NewCardLine(newDeck())
+	apr.AddShuffle("deck", bp.Deck.Len())
+	return apr, bp
+}
+
+// Execute implement Phase.Execute.
+func (d *dealPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *logic.ActionProfile[*burstPlayerAction]) (logic.PhaseName, *burstBoardProfile) {
+	// TODO: FIXME
+	// indexes := ap.NatureActionResult("deck")
+	// bp.Deck.ApplyShuffle(indexes)
+	bp.dealCards(config.TotalPlayer())
+	return PlayPhase, bp
 }
 
 // dealCards prepares a new round.
 func (bp *burstBoardProfile) dealCards(
 	totalPlayer uint,
 ) {
-	// dealCards deals cards to players.
-	// Shuffle cards
-	cards := newDeck()
+	cards := bp.Deck.Cards()
 
 	// Deal cards
 	for p := 0; p < int(totalPlayer); p++ {

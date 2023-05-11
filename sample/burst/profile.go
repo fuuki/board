@@ -1,18 +1,17 @@
 package burst
 
 import (
-	"github.com/fuuki/board"
+	"github.com/fuuki/board/logic"
 	"github.com/fuuki/board/resource"
 )
 
 // burstBoardProfile is a profile of the board.
-// ゲームはターン、シーケンス、ラウンド、ゲームの4つのレベルで構成される。
 type burstBoardProfile struct {
 	PlayerHands   []*resource.CardLine[*Card] `json:"player_hands"`
 	Deck          *resource.CardLine[*Card]   `json:"deck"`
 	PlayedHistory [][]*PlayedCard             `json:"played_history"`
 	Count         int                         `json:"count"`
-	Burster       board.Player                `json:"burster"`
+	Burster       logic.Player                `json:"burster"`
 }
 
 // burstBoardProfileDefinition is a definition of the board profile.
@@ -20,7 +19,7 @@ type burstBoardProfileDefinition struct {
 	totalPlayer uint
 }
 
-var _ board.BoardProfileDefinition[*burstBoardProfile] = (*burstBoardProfileDefinition)(nil)
+var _ logic.BoardProfileDefinition[*burstBoardProfile] = (*burstBoardProfileDefinition)(nil)
 
 // New returns a new board profile.
 func (d *burstBoardProfileDefinition) New() *burstBoardProfile {
@@ -28,7 +27,7 @@ func (d *burstBoardProfileDefinition) New() *burstBoardProfile {
 		PlayerHands: make([]*resource.CardLine[*Card], d.totalPlayer),
 	}
 	for i := uint(d.totalPlayer); i < d.totalPlayer; i++ {
-		p.PlayerHands[board.Player(i)] = resource.NewCardLine[*Card](nil)
+		p.PlayerHands[logic.Player(i)] = resource.NewCardLine[*Card](nil)
 	}
 	return p
 }
@@ -53,11 +52,29 @@ func (d *burstBoardProfileDefinition) Clone(bp *burstBoardProfile) *burstBoardPr
 	return result
 }
 
-func (jp *burstBoardProfile) Player(p board.Player) *resource.CardLine[*Card] {
+func (jp *burstBoardProfile) Player(p logic.Player) *resource.CardLine[*Card] {
 	return jp.PlayerHands[p]
 }
 
 type burstPlayerAction struct {
 	// Action is an action of the player.
 	Select resource.CardID
+}
+
+type burstConfig struct {
+	totalPlayer uint
+}
+
+var _ logic.Config = (*burstConfig)(nil)
+
+// NewConfig returns a new config.
+func NewConfig(totalPlayer uint) *burstConfig {
+	return &burstConfig{
+		totalPlayer: totalPlayer,
+	}
+}
+
+// TotalPlayer returns the total number of players.
+func (c *burstConfig) TotalPlayer() uint {
+	return c.totalPlayer
 }

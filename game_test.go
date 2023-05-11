@@ -1,14 +1,14 @@
 package board_test
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/fuuki/board"
+	"github.com/fuuki/board/logic"
 )
 
 const (
-	samplePhaseNamePlay board.PhaseName = "play"
+	samplePhaseNamePlay logic.PhaseName = "play"
 )
 
 type sampleBoardProfile struct {
@@ -37,36 +37,48 @@ func (d *sampleBoardProfileDefinition) Clone(bp *sampleBoardProfile) *sampleBoar
 	}
 }
 
-var _ board.BoardProfileDefinition[*sampleBoardProfile] = &sampleBoardProfileDefinition{}
+var _ logic.BoardProfileDefinition[*sampleBoardProfile] = &sampleBoardProfileDefinition{}
 
 type sampleActionDefinition struct {
 }
-type sGame = board.Game[*sampleBoardProfile, *sampleActionDefinition]
-type sPhase = board.Phase[*sampleBoardProfile, *sampleActionDefinition]
-type sAP = board.ActionProfile[*sampleActionDefinition]
-type sAR = board.ActionRequest[*sampleActionDefinition]
-type sBPD = board.BoardProfileDefinition[*sampleBoardProfile]
 
-// samplePhaseAllPlayerAction returns a sample phase
-func samplePhaseAllPlayerAction() *sPhase {
-	prepare := func(st *board.Status, bp *sampleBoardProfile) (*sAR, *sampleBoardProfile) {
-		apr := newSampleAR(st.TotalPlayer())
-		return apr, bp
+type sampleConfig struct{}
+
+func (c *sampleConfig) TotalPlayer() uint {
+	return 3
+}
+
+type sGame = board.Game[*sampleActionDefinition, *sampleBoardProfile, *sampleConfig]
+type sPhase = logic.Phase[*sampleActionDefinition, *sampleBoardProfile, *sampleConfig]
+type sAP = logic.ActionProfile[*sampleActionDefinition]
+type sAR = logic.ActionRequest[*sampleActionDefinition]
+type sBPD = logic.BoardProfileDefinition[*sampleBoardProfile]
+
+// samplePhaseAllPlayerAction is a sample phase that all players can do an action.
+type samplePhaseAllPlayerAction struct{}
+
+var _ sPhase = &samplePhaseAllPlayerAction{}
+
+func (s *samplePhaseAllPlayerAction) Name() logic.PhaseName {
+	return samplePhaseNamePlay
+}
+
+func (s *samplePhaseAllPlayerAction) Prepare(config *sampleConfig, bp *sampleBoardProfile) (*sAR, *sampleBoardProfile) {
+	apr := newSampleAR(config.TotalPlayer())
+	return apr, bp
+}
+
+func (s *samplePhaseAllPlayerAction) Execute(config *sampleConfig, bp *sampleBoardProfile, ap *sAP) (logic.PhaseName, *sampleBoardProfile) {
+	if bp.turn > 3 {
+		return "", bp
 	}
-	execute := func(st *board.Status, bp *sampleBoardProfile, ap *sAP) (board.PhaseName, *sampleBoardProfile) {
-		if bp.turn > 3 {
-			return "", bp
-		}
-		return samplePhaseNamePlay, bp
-	}
-	p := board.NewPhase(samplePhaseNamePlay, prepare, execute)
-	return p
+	return samplePhaseNamePlay, bp
 }
 
 func newSampleAR(totalPlayer uint) *sAR {
-	r := board.NewActionRequest[*sampleActionDefinition](totalPlayer)
+	r := logic.NewActionRequest[*sampleActionDefinition](totalPlayer)
 	for i := 0; i < int(totalPlayer); i++ {
-		r.RegisterValidator(board.Player(i), func(a *sampleActionDefinition) error { return nil })
+		r.RegisterValidator(logic.Player(i), func(a *sampleActionDefinition) error { return nil })
 	}
 	return r
 }
@@ -76,10 +88,9 @@ func TestNewGame(t *testing.T) {
 
 	type args struct {
 		totalPlayer  uint
-		initialPhase board.PhaseName
-		phases       []*sPhase
+		initialPhase logic.PhaseName
+		phases       []sPhase
 		bpd          sBPD
-		options      []board.GameOption[*sampleBoardProfile, *sampleActionDefinition]
 	}
 	tests := []struct {
 		name string
@@ -91,24 +102,20 @@ func TestNewGame(t *testing.T) {
 			args: args{
 				totalPlayer:  3,
 				initialPhase: samplePhaseNamePlay,
-				phases: []*sPhase{
-					samplePhaseAllPlayerAction(),
+				phases: []sPhase{
+					&samplePhaseAllPlayerAction{},
 				},
-				bpd:     &sampleBoardProfileDefinition{totalPlayer: 3},
-				options: []board.GameOption[*sampleBoardProfile, *sampleActionDefinition]{
-					// PhaseChangeChan[*sampleBoardProfile, *sampleActionDefinition](make(chan<- PeriodCount)),
-				},
+				bpd: &sampleBoardProfileDefinition{totalPlayer: 3},
 			},
-			want: &sGame{},
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := board.NewGame(tt.args.totalPlayer, tt.args.initialPhase, tt.args.phases, tt.args.bpd, tt.args.options...)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewGame() = %+v, want %+v", got, tt.want)
+			got := board.NewGame(tt.args.initialPhase, tt.args.phases, tt.args.bpd)
+			if got == nil {
+				t.Errorf("NewGame() should return a game")
 			}
 		})
 	}

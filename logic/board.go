@@ -1,4 +1,4 @@
-package board
+package logic
 
 type BoardProfile interface {
 }

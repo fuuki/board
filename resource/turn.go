@@ -3,17 +3,17 @@ package resource
 import (
 	"fmt"
 
-	"github.com/fuuki/board"
+	"github.com/fuuki/board/logic"
 )
 
 // Turn is a turn of the game.
 type Turn struct {
-	order   []board.Player
+	order   []logic.Player
 	current int
 }
 
 // NewTurn returns a new Turn.
-func NewTurn(order []board.Player, startPlayer board.Player) *Turn {
+func NewTurn(order []logic.Player, startPlayer logic.Player) *Turn {
 	c := 0
 	for i, p := range order {
 		if p == startPlayer {
@@ -29,15 +29,15 @@ func NewTurn(order []board.Player, startPlayer board.Player) *Turn {
 
 // NewSimpleTurn returns a new Turn with simple order.
 func NewSimpleTurn(totalPlayer uint) *Turn {
-	order := make([]board.Player, totalPlayer)
+	order := make([]logic.Player, totalPlayer)
 	for i := uint(0); i < totalPlayer; i++ {
-		order[i] = board.Player(i)
+		order[i] = logic.Player(i)
 	}
 	return NewTurn(order, 0)
 }
 
 // Next returns the next player.
-func (t *Turn) Next() board.Player {
+func (t *Turn) Next() logic.Player {
 	t.current++
 	if t.current >= len(t.order) {
 		t.current = 0
@@ -46,7 +46,7 @@ func (t *Turn) Next() board.Player {
 }
 
 // Current returns the current player.
-func (t *Turn) Current() board.Player {
+func (t *Turn) Current() logic.Player {
 	return t.order[t.current]
 }
 
@@ -59,7 +59,7 @@ func (t *Turn) Pass() {
 }
 
 // Order returns the order of the turn.
-func (t *Turn) Order() []board.Player {
+func (t *Turn) Order() []logic.Player {
 	return t.order
 }
 

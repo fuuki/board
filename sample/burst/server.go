@@ -6,19 +6,19 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/fuuki/board"
+	"github.com/fuuki/board/logic"
 )
 
 type Server struct {
-	g     *jGame
-	chans []chan board.PeriodCount
+	g     *jTable
+	chans []chan int
 }
 
 func NewServer() *Server {
 	g, ch := burstGame(2)
 	s := &Server{
 		g:     g,
-		chans: []chan board.PeriodCount{},
+		chans: []chan int{},
 	}
 	go func() {
 		for {
@@ -64,7 +64,7 @@ func (s *Server) actionService(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// アクションを実行
-	if err := s.g.RegisterAction(board.Player(req.Player), req.Action); err != nil {
+	if err := s.g.RegisterAction(logic.Player(req.Player), req.Action); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Default().Println(err)
 		return
@@ -120,7 +120,7 @@ func (s *Server) notificationService(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 
-	ch := make(chan board.PeriodCount)
+	ch := make(chan int)
 	s.chans = append(s.chans, ch)
 
 	for {

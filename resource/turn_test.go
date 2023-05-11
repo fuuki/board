@@ -4,23 +4,23 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/fuuki/board"
+	"github.com/fuuki/board/logic"
 )
 
 func TestTurn_Next(t *testing.T) {
 	type fields struct {
-		order   []board.Player
+		order   []logic.Player
 		current int
 	}
 	tests := []struct {
 		name   string
 		fields fields
-		want   board.Player
+		want   logic.Player
 	}{
 		{
 			name: "次のプレイヤーを取得できる",
 			fields: fields{
-				order: []board.Player{
+				order: []logic.Player{
 					3, 2, 1, 0,
 				},
 				current: 0,
