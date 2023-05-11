@@ -10,20 +10,20 @@ const (
 	PlayPhase logic.PhaseName = "play"
 )
 
-type jTable = board.Table[*burstPlayerAction, *burstBoardProfile, *burstConfig]
-type jPhase = logic.Phase[*burstPlayerAction, *burstBoardProfile, *burstConfig]
-type jAction = logic.ActionProfile[*burstPlayerAction]
-type jActionReq = logic.ActionRequest[*burstPlayerAction]
+type bTable = board.Table[*burstPlayerAction, *burstBoardProfile, *burstConfig]
+type bPhase = logic.Phase[*burstPlayerAction, *burstBoardProfile, *burstConfig]
+type bAction = logic.ActionProfile[*burstPlayerAction]
+type bActionReq = logic.ActionRequest[*burstPlayerAction]
 
 // burstGame returns a game of rock-paper-scissors.
-func burstGame(totalPlayer uint) (*jTable, <-chan int) {
+func burstGame(totalPlayer uint) (*bTable, <-chan int) {
 
 	var bpd logic.BoardProfileDefinition[*burstBoardProfile] = &burstBoardProfileDefinition{
 		totalPlayer: totalPlayer,
 	}
 	g := board.NewGame(
 		DealPhase,
-		[]jPhase{&dealPhase{}, &playPhase{}},
+		[]bPhase{&dealPhase{}, &playPhase{}},
 		bpd,
 	)
 	config := &burstConfig{

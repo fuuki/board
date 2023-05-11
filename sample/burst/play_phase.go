@@ -12,7 +12,7 @@ var ErrInvalidCard = errors.New("invalid card")
 
 type playPhase struct{}
 
-var _ jPhase = (*playPhase)(nil)
+var _ bPhase = (*playPhase)(nil)
 
 // Name returns a phase name.
 func (p *playPhase) Name() logic.PhaseName {
@@ -20,7 +20,7 @@ func (p *playPhase) Name() logic.PhaseName {
 }
 
 // Prepare implements Phase.Prepare.
-func (p *playPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*logic.ActionRequest[*burstPlayerAction], *burstBoardProfile) {
+func (p *playPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*bActionReq, *burstBoardProfile) {
 	// Define action profile
 	apr := logic.NewActionRequest[*burstPlayerAction](config.TotalPlayer())
 	for p := 0; p < int(config.TotalPlayer()); p++ {
@@ -41,7 +41,7 @@ func (p *playPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*logic.
 	return apr, bp
 }
 
-func (p *playPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *logic.ActionProfile[*burstPlayerAction]) (logic.PhaseName, *burstBoardProfile) {
+func (p *playPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *bAction) (logic.PhaseName, *burstBoardProfile) {
 	// 出したカードをプレイエリアに移動
 	played := make([]*PlayedCard, config.TotalPlayer())
 	for p := 0; p < int(config.TotalPlayer()); p++ {

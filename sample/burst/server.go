@@ -10,7 +10,7 @@ import (
 )
 
 type Server struct {
-	g     *jTable
+	g     *bTable
 	chans []chan int
 }
 

@@ -7,7 +7,7 @@ import (
 
 type dealPhase struct{}
 
-var _ jPhase = (*dealPhase)(nil)
+var _ bPhase = (*dealPhase)(nil)
 
 // Name implement Phase.Name.
 func (d *dealPhase) Name() logic.PhaseName {
@@ -15,7 +15,7 @@ func (d *dealPhase) Name() logic.PhaseName {
 }
 
 // Prepare implement Phase.Prepare.
-func (d *dealPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*logic.ActionRequest[*burstPlayerAction], *burstBoardProfile) {
+func (d *dealPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*bActionReq, *burstBoardProfile) {
 	apr := logic.NewActionRequest[*burstPlayerAction](config.TotalPlayer())
 	bp.Deck = resource.NewCardLine(newDeck())
 	apr.AddShuffle("deck", bp.Deck.Len())
@@ -23,7 +23,7 @@ func (d *dealPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*logic.
 }
 
 // Execute implement Phase.Execute.
-func (d *dealPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *logic.ActionProfile[*burstPlayerAction]) (logic.PhaseName, *burstBoardProfile) {
+func (d *dealPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *bAction) (logic.PhaseName, *burstBoardProfile) {
 	// TODO: FIXME
 	// indexes := ap.NatureActionResult("deck")
 	// bp.Deck.ApplyShuffle(indexes)
