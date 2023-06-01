@@ -19,90 +19,98 @@ type Table[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.Conf
 	isOver        bool
 
 	// channels
-	phaseChangeChan chan<- int
+	eventChan *eventChan
+}
+
+// newTable returns a new table.
+func newTable[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.Config](
+	mech *mech.Mech[AD, BP, CF], config CF,
+) (*Table[AD, BP, CF], <-chan *Event) {
+	rcvCh, ch := newEventChan()
+	table := &Table[AD, BP, CF]{
+		mech:      mech,
+		config:    config,
+		eventChan: ch,
+	}
+	return table, rcvCh
 }
 
 // initGame initializes the game.
 // this method should called after channels are set.
-func (g *Table[AD, BP, CF]) InitGame() {
+func (t *Table[AD, BP, CF]) InitGame() {
 	// initialize the first period
-	g.createFirstPeriod()
+	t.createFirstPeriod()
 }
 
 // createFirstPeriod creates the first period.
-func (g *Table[AD, BP, CF]) createFirstPeriod() {
-	initialPhase := g.mech.GetInitialPhase()
-	pr, result := period.NewFirstPeriod(initialPhase, g.mech.GetBoardProfileDefinition(), g.config)
-	g.registerPeriod(pr)
-
-	if result.IsCompleted {
-		g.afterPeriodCompleted(result.NextPhase)
-	}
+func (t *Table[AD, BP, CF]) createFirstPeriod() {
+	phase := t.mech.GetInitialPhase()
+	bp := t.mech.GetBoardProfileDefinition().New()
+	t.createPeriod(0, phase, bp)
 }
 
-// createContinuePeriod creates a new period.
-func (g *Table[AD, BP, CF]) createContinuePeriod(phaseName logic.PhaseName) {
-	phase := g.mech.GetPhase(phaseName)
-	count := g.currentPeriod().GetCount() + 1
-	bp := g.mech.GetBoardProfileDefinition().Clone(g.currentPeriod().GetBoardProfile())
+// createContinuePeriod creates the continue period.
+func (t *Table[AD, BP, CF]) createContinuePeriod(phaseName logic.PhaseName) {
+	phase := t.mech.GetPhase(phaseName)
+	count := t.currentPeriod().GetCount() + 1
+	bp := t.mech.GetBoardProfileDefinition().Clone(t.currentPeriod().GetBoardProfile())
+	t.createPeriod(count, phase, bp)
+}
 
-	pr, result := period.NewContinuePeriod(count, phase, bp, g.config)
-	g.registerPeriod(pr)
-
+// createPeriod creates a new period.
+func (t *Table[AD, BP, CF]) createPeriod(count int, phase logic.Phase[AD, BP, CF], bp BP) {
+	pr, result := period.NewPeriod(count, phase, bp, t.config)
+	t.registerPeriod(pr)
 	if result.IsCompleted {
-		g.afterPeriodCompleted(result.NextPhase)
+		t.afterPeriodCompleted(result.NextPhase)
 	}
 }
 
 // registerPeriod adds a new period to the game.
-func (g *Table[AD, BP, CF]) registerPeriod(pr *period.Period[AD, BP, CF]) {
-	if g.phaseChangeChan != nil {
-		g.phaseChangeChan <- pr.GetCount()
-	}
-	g.periodHistory = append(g.periodHistory, pr)
+func (t *Table[AD, BP, CF]) registerPeriod(pr *period.Period[AD, BP, CF]) {
+	t.eventChan.sendPhaseChange(pr.GetCount())
+	t.periodHistory = append(t.periodHistory, pr)
 }
 
 // RegisterAction registers the action of players.
 // It checks whether the action is valid.
-func (g *Table[AD, BP, CF]) RegisterAction(p logic.Player, a AD) error {
+func (t *Table[AD, BP, CF]) RegisterAction(p logic.Player, a AD) error {
 	log.Default().Printf("register action: %d", p)
-	result, err := g.currentPeriod().RegisterAction(p, a, time.Now())
+	result, err := t.currentPeriod().RegisterAction(p, a, time.Now())
 	if err != nil {
 		return err
 	}
 
 	if result.IsCompleted {
-		g.afterPeriodCompleted(result.NextPhase)
+		t.afterPeriodCompleted(result.NextPhase)
 	}
 	return nil
 }
 
 // afterPeriodCompleted is called when a period is completed.
-func (g *Table[AD, BP, CF]) afterPeriodCompleted(nextPhase logic.PhaseName) {
+func (t *Table[AD, BP, CF]) afterPeriodCompleted(nextPhase logic.PhaseName) {
 	if nextPhase == "" {
-		if g.phaseChangeChan != nil {
-			close(g.phaseChangeChan)
-		}
-		g.isOver = true
+		t.eventChan.close()
+		t.isOver = true
 		return
 	}
-	g.createContinuePeriod(nextPhase)
+	t.createContinuePeriod(nextPhase)
 }
 
 // currentPeriod returns the current period.
-func (g *Table[AD, BP, CF]) currentPeriod() *period.Period[AD, BP, CF] {
-	if len(g.periodHistory) == 0 {
+func (t *Table[AD, BP, CF]) currentPeriod() *period.Period[AD, BP, CF] {
+	if len(t.periodHistory) == 0 {
 		return nil
 	}
-	return g.periodHistory[len(g.periodHistory)-1]
+	return t.periodHistory[len(t.periodHistory)-1]
 }
 
 // IsOver returns true if the game is over.
-func (g *Table[AD, BP, CF]) IsOver() bool {
-	return g.isOver
+func (t *Table[AD, BP, CF]) IsOver() bool {
+	return t.isOver
 }
 
 // CurrentBoardProfile returns the current board profile.
-func (g *Table[AD, BP, CF]) CurrentBoardProfile() logic.BoardProfile {
-	return g.currentPeriod().GetBoardProfile()
+func (t *Table[AD, BP, CF]) CurrentBoardProfile() logic.BoardProfile {
+	return t.currentPeriod().GetBoardProfile()
 }

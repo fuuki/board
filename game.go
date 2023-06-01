@@ -24,12 +24,7 @@ func NewGame[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.Co
 }
 
 // NewTable returns a new table.
-func (g *Game[AD, BP, CF]) NewTable(config CF) (*Table[AD, BP, CF], <-chan int) {
-	phaseChangeChan := make(chan int)
-	table := &Table[AD, BP, CF]{
-		mech:            g.mech,
-		config:          config,
-		phaseChangeChan: phaseChangeChan,
-	}
+func (g *Game[AD, BP, CF]) NewTable(config CF) (*Table[AD, BP, CF], <-chan *Event) {
+	table, phaseChangeChan := newTable(g.mech, config)
 	return table, phaseChangeChan
 }

@@ -24,9 +24,8 @@ func (d *dealPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*bActio
 
 // Execute implement Phase.Execute.
 func (d *dealPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *bAction) (logic.PhaseName, *burstBoardProfile) {
-	// TODO: FIXME
-	// indexes := ap.NatureActionResult("deck")
-	// bp.Deck.ApplyShuffle(indexes)
+	indexes := ap.NatureActionResult("deck")
+	bp.Deck.ApplyShuffle(indexes)
 	bp.dealCards(config.TotalPlayer())
 	return PlayPhase, bp
 }

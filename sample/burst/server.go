@@ -6,30 +6,31 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/fuuki/board"
 	"github.com/fuuki/board/logic"
 )
 
 type Server struct {
 	g     *bTable
-	chans []chan int
+	chans []chan *board.Event
 }
 
 func NewServer() *Server {
-	g, ch := burstGame(2)
+	g, eventChan := burstGame(2)
 	s := &Server{
 		g:     g,
-		chans: []chan int{},
+		chans: []chan *board.Event{},
 	}
 	go func() {
 		for {
-			n, ok := <-ch
-			log.Default().Printf("[ch] period:%d\n", n)
+			e, ok := <-eventChan
+			log.Default().Printf("[ch] event:%v\n", e)
 			if !ok {
 				log.Default().Printf("[ch] channel closed\n")
 				break
 			}
 			for _, c := range s.chans {
-				c <- n
+				c <- e
 			}
 		}
 	}()
@@ -120,7 +121,7 @@ func (s *Server) notificationService(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 
-	ch := make(chan int)
+	ch := make(chan *board.Event)
 	s.chans = append(s.chans, ch)
 
 	for {

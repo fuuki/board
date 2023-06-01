@@ -6,75 +6,6 @@ import (
 	"github.com/fuuki/board/logic"
 )
 
-// playerAction is a player's action.
-type playerAction[AD logic.PlayerActionDefinition] struct {
-	player       logic.Player
-	action       AD
-	registeredAt time.Time
-}
-
-// periodAction is a period action profile.
-type periodAction[AD logic.PlayerActionDefinition] struct {
-	actionRequest *logic.ActionRequest[AD]
-	playerActions []*playerAction[AD]
-
-	// rawActionProfile is a raw action profile. It is derivable from playerActions.
-	rawActionProfile []AD
-}
-
-// NewperiodAction returns a new period action profile.
-func NewperiodAction[AD logic.PlayerActionDefinition](totalPlayer uint, request *logic.ActionRequest[AD]) *periodAction[AD] {
-	return &periodAction[AD]{
-		actionRequest:    request,
-		playerActions:    []*playerAction[AD]{},
-		rawActionProfile: make([]AD, totalPlayer),
-	}
-}
-
-// insertAction inserts an action.
-func (p *periodAction[AD]) insertAction(player logic.Player, action AD, now time.Time) error {
-	// check whether the player is valid
-	if player >= logic.Player(len(p.rawActionProfile)) {
-		return logic.ErrInvalidPlayer
-	}
-	// check whether the player is actionable
-	if !p.actionRequest.IsActionable(player) {
-		return logic.ErrNotActionablePlayer
-	}
-	// check whether the action is valid
-	if err := p.actionRequest.ValidateAction(player, action); err != nil {
-		return err
-	}
-
-	p.playerActions = append(p.playerActions, &playerAction[AD]{
-		player:       player,
-		action:       action,
-		registeredAt: now,
-	})
-	p.rawActionProfile[player] = action
-	return nil
-}
-
-// isAllPlayerRegistered returns nil if all players are registered.
-func (p *periodAction[AD]) isAllPlayerRegistered() bool {
-	// check whether all players are registered
-	for i, action := range p.rawActionProfile {
-		// check whether the action is valid
-		if !p.actionRequest.IsActionable(logic.Player(i)) {
-			continue
-		}
-		if p.actionRequest.ValidateAction(logic.Player(i), action) != nil {
-			return false
-		}
-	}
-	return true
-}
-
-// GetActionProfile returns the action profile.
-func (p *periodAction[AD]) GetActionProfile() *logic.ActionProfile[AD] {
-	return logic.NewActionProfile(p.rawActionProfile)
-}
-
 // Period is a period of the game.
 type Period[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.Config] struct {
 	config       CF
@@ -84,27 +15,8 @@ type Period[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.Con
 	periodAction *periodAction[AD]
 }
 
-// NewFirstPeriod returns a new period.
-func NewFirstPeriod[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.Config](
-	phase logic.Phase[AD, BP, CF],
-	bpd logic.BoardProfileDefinition[BP],
-	config CF,
-) (*Period[AD, BP, CF], *periodExecuteResult) {
-	bp := bpd.New()
-	ar, bp := phase.Prepare(config, bp)
-	p := &Period[AD, BP, CF]{
-		config:       config,
-		count:        0,
-		phase:        phase,
-		boardProfile: bp,
-		periodAction: NewperiodAction(config.TotalPlayer(), ar),
-	}
-	r := p.executeChallenge()
-	return p, r
-}
-
-// NewContinuePeriod returns a new period.
-func NewContinuePeriod[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.Config](
+// NewPeriod returns a new period.
+func NewPeriod[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.Config](
 	count int,
 	phase logic.Phase[AD, BP, CF],
 	boardProfile BP,
@@ -147,10 +59,6 @@ func (p *Period[AD, BP, CF]) executeChallenge() *periodExecuteResult {
 			NextPhase:   "",
 		}
 	}
-
-	// set the nature action
-	// TODO: implement
-	// p.actionProfile.natureActions = p.actionRequest.naturalPlayer.GetResults()
 
 	// apply the action
 	next, bp := p.phase.Execute(p.config, p.boardProfile, p.periodAction.GetActionProfile())

@@ -16,7 +16,7 @@ type bAction = logic.ActionProfile[*burstPlayerAction]
 type bActionReq = logic.ActionRequest[*burstPlayerAction]
 
 // burstGame returns a game of rock-paper-scissors.
-func burstGame(totalPlayer uint) (*bTable, <-chan int) {
+func burstGame(totalPlayer uint) (*bTable, <-chan *board.Event) {
 
 	var bpd logic.BoardProfileDefinition[*burstBoardProfile] = &burstBoardProfileDefinition{
 		totalPlayer: totalPlayer,
