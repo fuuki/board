@@ -3,9 +3,14 @@ package resource
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strings"
 )
+
+// ErrNotFound is returned when a card is not found.
+var ErrNotFound = fmt.Errorf("card not found")
+
+// ErrEmptyCardLine is returned when a card line is empty.
+var ErrEmptyCardLine = fmt.Errorf("card line is empty")
 
 // CardID is a card ID.
 type CardID string
@@ -41,24 +46,27 @@ func (cl *CardLine[C]) Cards() []C {
 }
 
 // Pick picks a card from the line.
-func (cl *CardLine[C]) Pick(id CardID) C {
+func (cl *CardLine[C]) Pick(id CardID) (C, error) {
+	if len(cl.line) == 0 {
+		return *new(C), ErrEmptyCardLine
+	}
 	for i, c := range cl.line {
 		if c.ID() == id {
 			cl.line = remove(cl.line, i)
-			return c
+			return c, nil
 		}
 	}
-	return *new(C)
+	return *new(C), ErrNotFound
 }
 
 // Draw draws a card from the line.
-func (cl *CardLine[C]) Draw() C {
+func (cl *CardLine[C]) Draw() (C, error) {
 	if len(cl.line) == 0 {
-		return *new(C)
+		return *new(C), ErrEmptyCardLine
 	}
 	c := cl.line[0]
 	cl.line = cl.line[1:]
-	return c
+	return c, nil
 }
 
 // Has returns true if the line has the card.
@@ -69,18 +77,6 @@ func (cl *CardLine[C]) Has(id CardID) bool {
 		}
 	}
 	return false
-}
-
-// PickMulti picks multiple cards from the line.
-func (cl *CardLine[C]) PickMulti(ids []CardID) []C {
-	var cards []C
-	for _, id := range ids {
-		c := cl.Pick(id)
-		if reflect.ValueOf(c).IsZero() {
-			cards = append(cards, c)
-		}
-	}
-	return cards
 }
 
 // Equals returns true if the line is equal to the other line.
@@ -102,12 +98,16 @@ func (cl *CardLine[C]) Len() int {
 }
 
 // ApplyShuffle applies a shuffle to the line.
-func (cl *CardLine[C]) ApplyShuffle(shuffleIndexes []int) {
+func (cl *CardLine[C]) ApplyShuffle(shuffleIndexes []int) error {
+	if len(cl.line) != len(shuffleIndexes) {
+		return fmt.Errorf("shuffle indexes length mismatch")
+	}
 	var line = make([]C, len(cl.line))
 	for i, si := range shuffleIndexes {
 		line[i] = cl.line[si]
 	}
 	cl.line = line
+	return nil
 }
 
 // String returns a string representation of the line.

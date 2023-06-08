@@ -58,12 +58,16 @@ func (t *Table[AD, BP, CF]) createContinuePeriod(phaseName logic.PhaseName) {
 }
 
 // createPeriod creates a new period.
-func (t *Table[AD, BP, CF]) createPeriod(count int, phase logic.Phase[AD, BP, CF], bp BP) {
-	pr, result := period.NewPeriod(count, phase, bp, t.config)
+func (t *Table[AD, BP, CF]) createPeriod(count int, phase logic.Phase[AD, BP, CF], bp BP) error {
+	pr, result, err := period.NewPeriod(count, phase, bp, t.config)
+	if err != nil {
+		return err
+	}
 	t.registerPeriod(pr)
 	if result.IsCompleted {
 		t.afterPeriodCompleted(result.NextPhase)
 	}
+	return nil
 }
 
 // registerPeriod adds a new period to the game.

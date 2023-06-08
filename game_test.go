@@ -63,16 +63,16 @@ func (s *samplePhaseAllPlayerAction) Name() logic.PhaseName {
 	return samplePhaseNamePlay
 }
 
-func (s *samplePhaseAllPlayerAction) Prepare(config *sampleConfig, bp *sampleBoardProfile) (*sAR, *sampleBoardProfile) {
+func (s *samplePhaseAllPlayerAction) Prepare(config *sampleConfig, bp *sampleBoardProfile) (*sAR, *sampleBoardProfile, error) {
 	apr := newSampleAR(config.TotalPlayer())
-	return apr, bp
+	return apr, bp, nil
 }
 
-func (s *samplePhaseAllPlayerAction) Execute(config *sampleConfig, bp *sampleBoardProfile, ap *sAP) (logic.PhaseName, *sampleBoardProfile) {
+func (s *samplePhaseAllPlayerAction) Execute(config *sampleConfig, bp *sampleBoardProfile, ap *sAP) (logic.PhaseName, *sampleBoardProfile, error) {
 	if bp.turn > 3 {
-		return "", bp
+		return "", bp, nil
 	}
-	return samplePhaseNamePlay, bp
+	return samplePhaseNamePlay, bp, nil
 }
 
 func newSampleAR(totalPlayer uint) *sAR {

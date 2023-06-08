@@ -15,19 +15,22 @@ func (d *dealPhase) Name() logic.PhaseName {
 }
 
 // Prepare implement Phase.Prepare.
-func (d *dealPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*bActionReq, *burstBoardProfile) {
+func (d *dealPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*bActionReq, *burstBoardProfile, error) {
 	apr := logic.NewActionRequest[*burstPlayerAction](config.TotalPlayer())
 	bp.Deck = resource.NewCardLine(newDeck())
 	apr.AddShuffle("deck", bp.Deck.Len())
-	return apr, bp
+	return apr, bp, nil
 }
 
 // Execute implement Phase.Execute.
-func (d *dealPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *bAction) (logic.PhaseName, *burstBoardProfile) {
+func (d *dealPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *bAction) (logic.PhaseName, *burstBoardProfile, error) {
 	indexes := ap.NatureActionResult("deck")
-	bp.Deck.ApplyShuffle(indexes)
+	err := bp.Deck.ApplyShuffle(indexes)
+	if err != nil {
+		return "", bp, err
+	}
 	bp.dealCards(config.TotalPlayer())
-	return PlayPhase, bp
+	return PlayPhase, bp, nil
 }
 
 // dealCards prepares a new round.

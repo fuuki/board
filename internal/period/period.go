@@ -21,8 +21,12 @@ func NewPeriod[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.
 	phase logic.Phase[AD, BP, CF],
 	boardProfile BP,
 	config CF,
-) (*Period[AD, BP, CF], *periodExecuteResult) {
-	ar, bp := phase.Prepare(config, boardProfile)
+) (*Period[AD, BP, CF], *periodExecuteResult, error) {
+	ar, bp, err := phase.Prepare(config, boardProfile)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	p := &Period[AD, BP, CF]{
 		config:       config,
 		count:        count,
@@ -30,8 +34,11 @@ func NewPeriod[AD logic.PlayerActionDefinition, BP logic.BoardProfile, CF logic.
 		boardProfile: bp,
 		periodAction: NewperiodAction(config.TotalPlayer(), ar),
 	}
-	r := p.executeChallenge()
-	return p, r
+	r, err := p.executeChallenge()
+	if err != nil {
+		return nil, nil, err
+	}
+	return p, r, err
 }
 
 // RegisterAction registers an action.
@@ -42,7 +49,8 @@ func (p *Period[AD, BP, CF]) RegisterAction(player logic.Player, action AD, now 
 		return nil, err
 	}
 
-	return p.executeChallenge(), nil
+	result, err := p.executeChallenge()
+	return result, err
 }
 
 type periodExecuteResult struct {
@@ -51,22 +59,25 @@ type periodExecuteResult struct {
 }
 
 // executeChallenge executes if the period action is completed.
-func (p *Period[AD, BP, CF]) executeChallenge() *periodExecuteResult {
+func (p *Period[AD, BP, CF]) executeChallenge() (*periodExecuteResult, error) {
 	// check whether the action is valid
 	if ok := p.periodAction.isAllPlayerRegistered(); !ok {
 		return &periodExecuteResult{
 			IsCompleted: false,
 			NextPhase:   "",
-		}
+		}, nil
 	}
 
 	// apply the action
-	next, bp := p.phase.Execute(p.config, p.boardProfile, p.periodAction.GetActionProfile())
+	next, bp, err := p.phase.Execute(p.config, p.boardProfile, p.periodAction.GetActionProfile())
+	if err != nil {
+		return nil, err
+	}
 	p.boardProfile = bp
 	return &periodExecuteResult{
 		IsCompleted: true,
 		NextPhase:   next,
-	}
+	}, nil
 }
 
 // GetBoardProfile returns the board profile.

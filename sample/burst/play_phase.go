@@ -20,7 +20,7 @@ func (p *playPhase) Name() logic.PhaseName {
 }
 
 // Prepare implements Phase.Prepare.
-func (p *playPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*bActionReq, *burstBoardProfile) {
+func (p *playPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*bActionReq, *burstBoardProfile, error) {
 	// Define action profile
 	apr := logic.NewActionRequest[*burstPlayerAction](config.TotalPlayer())
 	for p := 0; p < int(config.TotalPlayer()); p++ {
@@ -38,15 +38,18 @@ func (p *playPhase) Prepare(config *burstConfig, bp *burstBoardProfile) (*bActio
 			return nil
 		})
 	}
-	return apr, bp
+	return apr, bp, nil
 }
 
-func (p *playPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *bAction) (logic.PhaseName, *burstBoardProfile) {
+func (p *playPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *bAction) (logic.PhaseName, *burstBoardProfile, error) {
 	// 出したカードをプレイエリアに移動
 	played := make([]*PlayedCard, config.TotalPlayer())
 	for p := 0; p < int(config.TotalPlayer()); p++ {
 		id := ap.Player(logic.Player(p)).Select
-		c := bp.PlayerHands[logic.Player(p)].Pick(id)
+		c, err := bp.PlayerHands[logic.Player(p)].Pick(id)
+		if err != nil {
+			return "", bp, err
+		}
 		played[p] = &PlayedCard{
 			Card:   c,
 			Player: logic.Player(p),
@@ -61,15 +64,19 @@ func (p *playPhase) Execute(config *burstConfig, bp *burstBoardProfile, ap *bAct
 		bp.Count += p.Card.Number
 		if bp.Count > 30 {
 			bp.Burster = p.Player
-			return "", bp
+			return "", bp, nil
 		}
 	}
 
 	// カードを補充
 	for p := 0; p < int(config.TotalPlayer()); p++ {
-		bp.PlayerHands[logic.Player(p)].Add(bp.Deck.Draw())
+		c, err := bp.Deck.Draw()
+		if err != nil {
+			return "", bp, err
+		}
+		bp.PlayerHands[logic.Player(p)].Add(c)
 	}
-	return PlayPhase, bp
+	return PlayPhase, bp, nil
 }
 
 func sortPlayedCards(played []*PlayedCard) {

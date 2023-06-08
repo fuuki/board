@@ -11,8 +11,8 @@ type Config interface {
 type Phase[AD PlayerActionDefinition, BP BoardProfile, CF Config] interface {
 	Name() PhaseName
 	// prepare returns the action profile definition.
-	Prepare(CF, BP) (*ActionRequest[AD], BP)
+	Prepare(CF, BP) (*ActionRequest[AD], BP, error)
 	// execute returns the next phase name.
 	// if the next phase name is empty, the game is over.
-	Execute(CF, BP, *ActionProfile[AD]) (PhaseName, BP)
+	Execute(CF, BP, *ActionProfile[AD]) (PhaseName, BP, error)
 }
